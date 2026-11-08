@@ -3,4 +3,4 @@ Allow: /
 Disallow: /checkout.html
 Disallow: /order-success.html
 
-Sitemap: https://baznivo-makeup.vercel.app/sitemap.xml
+Sitemap: https://baznivo-storefront.vercel.app/sitemap.xml

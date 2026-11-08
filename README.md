@@ -2,7 +2,7 @@
 
 Purple/pink beauty storefront for the Pakistani market. **Static site** (HTML + CSS + vanilla JS), koi build step nahi — GitHub par push karein, Vercel khud deploy kar dega.
 
-Live preview: **https://baznivo-makeup.vercel.app** *(deploy ke baad)*
+Live preview: **https://baznivo-storefront.vercel.app** *(deploy ke baad)*
 
 ---
 
