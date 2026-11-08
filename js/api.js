@@ -45,7 +45,8 @@ function mapCategory(c) {
 function mapProduct(p) {
   const price = toMajor(p.effective_price ?? p.sale_price ?? p.price);
   const regular = toMajor(p.price);
-  const oldPrice = regular && regular > price ? regular : null;
+  let oldPrice = regular && regular > price ? regular : null;
+  if (oldPrice && oldPrice > price * 5) oldPrice = null; // ghalat enter hui price (data bug) ignore
   const gallery = [absImg(p.image)];
   return {
     id: p.id,
