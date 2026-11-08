@@ -130,3 +130,21 @@ Jab backend ready ho to sirf 3 jagah change karna hoga:
 3. **Cart / wishlist** — localStorage ki jagah server cart (optional).
 
 Baqi UI, design aur pages waise hi rahenge.
+
+## Live API integration (data source)
+
+- `js/api.js` boot par `https://baznivo.vercel.app/api/*` se catalog/categories/settings/blog/reviews leta hai.
+- `vercel.json` rewrites: `/api/*` → live API, `/media/*` → live `assets/*`.
+  `/media` proxy zaroori hai kyunki live site images `cross-origin-resource-policy: same-origin`
+  bhejti hai — direct hotlink browser block kar deta hai.
+- Bundled `js/data.js` sirf fallback hai; `?mock=1` se force hota hai, `?rawcats=1` se API ki
+  asli (mixed) categories dikhti hain.
+- Category groups product name keywords se bante hain (`CATEGORY_RULES` in `js/api.js`) kyunki
+  API mein categories gadbad hain. Admin theek hone par yeh layer hata dein.
+- Prices paisa (minor units) mein aati hain; agar value < 100 likhi ho to rupees maan kar fix hoti hai.
+
+## Mobile
+
+- `--cols` CSS variable grid (4 / 3 / 2 columns).
+- Shop filters 980px se neeche collapsible `<details>`.
+- Product card ka add-to-cart mobile par body ke neeche (price ke oopar nahi).

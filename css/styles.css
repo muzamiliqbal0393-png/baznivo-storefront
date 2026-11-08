@@ -311,7 +311,7 @@ p:last-child { margin-bottom: 0; }
 
 /* ---------- Product cards ---------- */
 .grid-products {
-  display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem;
+  display: grid; grid-template-columns: repeat(var(--cols, 4), 1fr); gap: 1.25rem;
 }
 .p-card {
   position: relative; display: flex; flex-direction: column;
@@ -666,6 +666,12 @@ p:last-child { margin-bottom: 0; }
   box-shadow: 0 4px 12px rgba(51, 6, 92, .1);
 }
 
+.grid-products.cols-3 { --cols: 3; }
+
+/* shop filters: mobile par collapsible */
+.filters__toggle { display: none; }
+.filters__toggle::-webkit-details-marker { display: none; }
+
 /* page head + sections rhythm */
 .section { padding-block: clamp(2.6rem, 4.5vw, 4rem); }
 .section-head__title { letter-spacing: -.01em; }
@@ -673,7 +679,7 @@ p:last-child { margin-bottom: 0; }
 @media (max-width: 1180px) {
   .search { min-width: 180px; }
   .nav__link { padding: .5rem .7rem; font-size: .87rem; }
-  .grid-products { grid-template-columns: repeat(3, 1fr); }
+  .grid-products { --cols: 3; }
   .cat-grid { grid-template-columns: repeat(3, 1fr); }
   .trust__in { grid-template-columns: repeat(3, 1fr); row-gap: .9rem; }
   .trust__item:nth-child(3) { border-right: 0; }
@@ -714,7 +720,7 @@ p:last-child { margin-bottom: 0; }
   .container { width: calc(100% - 28px); }
   :root { --header-h: 66px; }
   .brand img { height: 38px; }
-  .grid-products { grid-template-columns: repeat(2, 1fr); gap: .9rem; }
+  .grid-products { --cols: 2; gap: .9rem; }
   .cat-grid { grid-template-columns: repeat(2, 1fr); gap: .8rem; }
   .trust__in { grid-template-columns: 1fr 1fr; padding: .9rem; }
   .trust__item { border-right: 0; }
@@ -818,4 +824,100 @@ p:last-child { margin-bottom: 0; }
 @media (max-width: 700px) {
   .field-row { grid-template-columns: 1fr; }
   .card { padding: 1.1rem; }
+}
+
+
+/* ==========================================================================
+   Mobile pass — 700px aur neeche sab kuch set
+   ========================================================================== */
+@media (max-width: 700px) {
+  /* hero */
+  .hero__slide.is-live { min-height: 0; }
+  .hero__in { padding-block: 2.6rem 3rem; }
+  .hero__mark { height: 52px; margin-bottom: .7rem; }
+  .hero__tagline { font-size: .72rem; letter-spacing: .14em; margin-bottom: .6rem; }
+  .hero__title { font-size: 1.85rem; line-height: 1.15; margin-bottom: .6rem; }
+  .hero__sub { font-size: .9rem; line-height: 1.5; margin-bottom: 1.2rem; text-shadow: 0 2px 12px rgba(20, 2, 40, .8); }
+  .hero__actions { gap: .6rem; }
+  .hero__actions .btn { flex: 1 1 auto; justify-content: center; padding: .8rem 1rem; font-size: .9rem; }
+  .hero__media::after {
+    background: linear-gradient(180deg, rgba(28, 3, 48, .55) 0%, rgba(28, 3, 48, .5) 45%, rgba(28, 3, 48, .8) 100%);
+  }
+
+  /* trust strip: 2 x 2, orphan item hataya */
+  .trust__in { grid-template-columns: 1fr 1fr; gap: .9rem; padding: 1rem; }
+  .trust__item { font-size: .82rem; }
+  .trust__item:nth-child(5) { display: none; }
+  .trust__item strong { font-size: .85rem; }
+
+  /* product cards: button neeche, price ke oopar nahi */
+  .p-card { border-radius: 14px; }
+  .p-card__media img { border-radius: 0; }
+  .p-card__body { order: 1; padding: .7rem .75rem .3rem; gap: .28rem; }
+  .p-card__quick { order: 2; position: static; transform: none; opacity: 1; padding: .55rem .75rem .8rem; }
+  .p-card__quick .btn {
+    padding: .58rem .6rem; font-size: .76rem; gap: .3rem; white-space: nowrap;
+    border-radius: 12px; letter-spacing: .01em;
+  }
+  .p-card__quick .btn svg { width: 15px; height: 15px; }
+  .p-card__cat { font-size: .62rem; letter-spacing: .05em; }
+  .p-card__name { font-size: .86rem; line-height: 1.28; min-height: 2.5em; }
+  .rating, .rating--empty { font-size: .66rem; }
+  .p-card__price { gap: .35rem; padding-top: .3rem; }
+  .price-now { font-size: .95rem; }
+  .price-old, .price-off { font-size: .68rem; }
+  .p-card__wish { opacity: 1; transform: none; width: 30px; height: 30px; }
+
+  /* category tiles: label poora dikhe */
+  .cat-card { gap: .55rem; padding: .6rem; }
+  .cat-card__label {
+    white-space: normal; font-size: .7rem; line-height: 1.2;
+    padding: .38rem .6rem; text-align: center;
+  }
+  .cat-grid { gap: .7rem; }
+  .grid-products.cols-3 { --cols: 2; }
+  .cat-card__label { min-height: 2.5em; display: flex; align-items: center; justify-content: center; }
+  .topbar__socials { display: none; }
+  .topbar__in, .topbar__list { justify-content: center; }
+
+  /* shop filters collapsible */
+  .filters {
+    display: block; padding: 0; border-radius: 16px; overflow: hidden;
+  }
+  .filters__toggle {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: .95rem 1.1rem; font-weight: 800; font-size: .9rem;
+    color: var(--purple-deep); cursor: pointer; list-style: none;
+    background: #fff;
+  }
+  .filters__toggle::after { content: "＋"; color: var(--pink-strong); font-weight: 700; }
+  .filters[open] .filters__toggle::after { content: "−"; }
+  .filters > h3, .filters > div, .filters__group { padding-inline: 1.1rem; }
+  .filters > h3 { margin-top: 1rem; }
+  .filters__group:last-child { padding-bottom: 1.1rem; }
+  .shop__bar { gap: .6rem; align-items: center; }
+  .shop__count { font-size: .8rem; }
+
+  /* misc */
+  .section-head__title { font-size: 1.35rem; }
+  .section-head__sub { font-size: .86rem; }
+  .page-head h1 { font-size: 1.45rem; }
+  .container { padding-inline: 16px; }
+
+  /* hero title: balanced line breaks */
+  .hero__title { text-wrap: balance; }
+
+  /* price row: discount % badge already upar hai */
+  .p-card__price .price-off { display: none; }
+
+  /* breadcrumb ek line mein */
+  .crumbs { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: .72rem; }
+
+  /* product page buy row */
+  .pd__buy { display: flex; flex-wrap: wrap; gap: .6rem; }
+  .pd__buy .qty { flex: 0 0 auto; min-width: 104px; }
+  .pd__buy .btn { flex: 1 1 60%; white-space: nowrap; justify-content: center; padding: .8rem .9rem; font-size: .86rem; }
+  .pd__buy .btn--ghost { flex: 1 1 100%; }
+  .pd__price { flex-wrap: wrap; row-gap: .3rem; }
+  .pd h1 { font-size: 1.5rem; line-height: 1.2; }
 }

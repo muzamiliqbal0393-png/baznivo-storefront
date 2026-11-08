@@ -591,6 +591,9 @@ let shopState = { category: [], q: '', sort: 'new', max: 100000, wish: false };
 
 function initShop() {
   const params = new URLSearchParams(location.search);
+  // mobile par filters band, desktop par khule
+  const filtersEl = $('#filters');
+  if (filtersEl) filtersEl.open = window.innerWidth > 980;
   if (params.get('category')) shopState.category = [params.get('category')];
   if (params.get('q')) shopState.q = params.get('q').toLowerCase();
   if (params.get('wish')) shopState.wish = true;

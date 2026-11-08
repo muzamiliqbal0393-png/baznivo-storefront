@@ -22,7 +22,8 @@
 
 <div class="container">
   <div class="shop">
-    <aside class="filters" aria-label="Filters">
+    <details class="filters" id="filters" open aria-label="Filters">
+      <summary class="filters__toggle">Filters &amp; sort</summary>
       <h3>Category</h3>
       <div id="filter-cats"></div>
 
@@ -39,7 +40,7 @@
         <p style="font-size:.85rem;color:var(--muted)">Shade ya skin type ke hisaab se choose karne mein help chahiye? WhatsApp par pooch lein.</p>
         <a class="btn btn--ghost btn--sm" href="contact.html">Contact karein</a>
       </div>
-    </aside>
+    </details>
 
     <div>
       <div class="shop__bar">
@@ -59,7 +60,7 @@
         </label>
       </div>
 
-      <div class="grid-products" id="shop-grid" style="grid-template-columns:repeat(3,1fr)"></div>
+      <div class="grid-products cols-3" id="shop-grid"></div>
     </div>
   </div>
 </div>
