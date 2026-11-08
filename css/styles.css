@@ -331,6 +331,7 @@ p:last-child { margin-bottom: 0; }
 .chip--purple { background: var(--purple); }
 .chip--green { background: var(--green); }
 .chip--gold { background: var(--gold); }
+.chip--muted { background: #8b7a99; }
 .p-card__wish {
   position: absolute; top: .7rem; right: .7rem; width: 34px; height: 34px; border-radius: 50%;
   display: grid; place-items: center; background: rgba(255, 255, 255, .94); color: var(--purple);
@@ -610,6 +611,65 @@ p:last-child { margin-bottom: 0; }
 /* ==========================================================================
    Responsive
    ========================================================================== */
+/* ---------- polish pass (uniform, prod-ready) ---------- */
+.btn--onDark {
+  background: rgba(255,255,255,.12); box-shadow: none;
+  border: 1.5px solid rgba(255,255,255,.5); color: #fff;
+}
+.btn--onDark:hover { background: #fff; color: var(--purple-deep); border-color: #fff; }
+
+/* product photos: real images, uniform frame */
+.p-card__media { background: #fbf7fd; }
+.p-card__media img { object-fit: cover; background: #fbf7fd; }
+.p-card__media.is-empty { background: linear-gradient(135deg, #fdf1f9, #f2e8fd); }
+.p-card__media.is-empty img { opacity: 0; }
+.p-card__media.is-empty::after {
+  content: "Baznivo"; position: absolute; inset: 0; display: grid; place-items: center;
+  font-size: .78rem; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; color: #c9a7dd;
+}
+.p-card__name {
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden; min-height: 2.6em;
+}
+.p-card__excerpt {
+  font-size: .85rem; color: var(--muted); margin: 0;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.p-card--story .p-card__body { gap: .5rem; }
+.rating--empty { font-size: .7rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #bda6cc; }
+.rating { min-height: 1.15em; }
+
+/* footer ko floating WhatsApp button se bachao */
+.footer__bottom { padding-right: 150px; }
+@media (max-width: 700px) { .footer__bottom { padding-right: 0; padding-bottom: 3.4rem; } }
+
+/* single hero: predictable height on every screen */
+.hero__slide.is-live { min-height: clamp(440px, 58vh, 600px); }
+.hero__content { padding-block: clamp(.5rem, 2vw, 1.5rem); }
+.hero__title { font-size: clamp(2rem, 4.6vw, 3.4rem); line-height: 1.08; letter-spacing: -.01em; }
+.hero__sub { max-width: 46ch; margin-inline: auto; }
+
+/* category tiles: same frame for every photo */
+.cat-card {
+  display: flex; flex-direction: column; align-items: stretch; gap: .7rem;
+  padding: .75rem; text-align: center;
+  background: linear-gradient(180deg, #fdf1f9 0%, #f7dff0 100%);
+}
+.cat-card img {
+  aspect-ratio: 1 / 1; object-fit: cover; width: 100%;
+  background: #fff; border-radius: 12px;
+}
+.cat-card__label {
+  position: static; transform: none; align-self: center;
+  font-size: .78rem; padding: .42rem .85rem; max-width: 100%;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(51, 6, 92, .1);
+}
+
+/* page head + sections rhythm */
+.section { padding-block: clamp(2.6rem, 4.5vw, 4rem); }
+.section-head__title { letter-spacing: -.01em; }
+
 @media (max-width: 1180px) {
   .search { min-width: 180px; }
   .nav__link { padding: .5rem .7rem; font-size: .87rem; }

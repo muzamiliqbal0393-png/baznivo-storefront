@@ -199,7 +199,7 @@ function footerHTML() {
     <div class="container footer__top">
       <div class="footer__brand">
         <img src="assets/img/logo.png" alt="Baznivo">
-        <p>Makeup, skincare aur beauty essentials — sirf original products, cash on delivery ke saath, poore Pakistan mein.</p>
+        <p>Baznivo — curated everyday essentials: fashion, beauty, tech aur home. Original products, cash on delivery poore Pakistan mein.</p>
         <div class="footer__contact">
           <span>${I.pin} ${STORE.city}</span>
           <span>${I.mail} ${STORE.email}</span>
@@ -219,7 +219,7 @@ function footerHTML() {
           <li><a href="contact.html">Contact us</a></li>
           <li><a href="contact.html#faq">Delivery &amp; returns</a></li>
           <li><a href="contact.html#faq">How to order</a></li>
-          <li><a href="blog.html">Beauty journal</a></li>
+          <li><a href="blog.html">Journal</a></li>
           <li><a href="about.html">About Baznivo</a></li>
         </ul>
       </div>
@@ -253,7 +253,7 @@ function cartDrawerHTML() {
     <div class="drawer__foot" id="cart-foot"></div>
   </aside>
   <div class="toast-wrap" id="toasts"></div>
-  <a class="wa-float" href="${cartUrl('Assalam o Alaikum! Baznivo par makeup products ke bare mein poochna hai.')}" target="_blank" rel="noopener" aria-label="WhatsApp">
+  <a class="wa-float" href="${cartUrl('Assalam o Alaikum! Baznivo par products ke bare mein poochna hai.')}" target="_blank" rel="noopener" aria-label="WhatsApp">
     ${I.wa}<span>Chat with us</span>
   </a>`;
 }
@@ -291,7 +291,7 @@ function renderCart() {
   if (!body) return;
 
   if (!Cart.items.length) {
-    body.innerHTML = `<div class="cart-empty"><p><strong>Aap ka cart khali hai.</strong></p><p style="font-size:.86rem">Makeup picks shamil karein aur shopping shuru karein.</p><a class="btn btn--sm" href="shop.html">Shop now</a></div>`;
+    body.innerHTML = `<div class="cart-empty"><p><strong>Aap ka cart khali hai.</strong></p><p style="font-size:.86rem">Products shamil karein aur shopping shuru karein.</p><a class="btn btn--sm" href="shop.html">Shop now</a></div>`;
     foot.innerHTML = '';
     return;
   }
@@ -360,26 +360,30 @@ function closeCart() {
 
 /* ----------------------------- product card ----------------------------- */
 function productCard(p) {
-  const stars = I.star.repeat(Math.round(p.rating));
+  const rating =
+    p.reviews > 0
+      ? `<div class="rating">${I.star.repeat(Math.max(1, Math.round(p.rating)))} <span>${p.rating.toFixed(1)} (${p.reviews})</span></div>`
+      : '<div class="rating rating--empty"><span>New arrival</span></div>';
   return `
   <article class="p-card reveal">
     <a class="p-card__media" href="product.html?slug=${p.slug}" aria-label="${p.name}">
-      <img src="${p.image}" alt="${p.name}" loading="lazy">
+      <img src="${p.image}" alt="${p.name}" loading="lazy" onerror="this.closest('.p-card__media').classList.add('is-empty')">
       <div class="p-card__badges">
-        ${p.badge ? `<span class="chip${p.badge === 'New' ? ' chip--purple' : p.badge === 'Limited' ? ' chip--gold' : ''}">${p.badge}</span>` : ''}
+        ${p.badge ? `<span class="chip${p.badge === 'Limited' ? ' chip--gold' : ''}">${p.badge}</span>` : ''}
         ${off(p) >= 15 ? `<span class="chip chip--green">-${off(p)}%</span>` : ''}
+        ${p.stock === 0 ? '<span class="chip chip--muted">Out of stock</span>' : ''}
       </div>
     </a>
     <button class="p-card__wish${Wishlist.has(p.slug) ? ' is-on' : ''}" data-wish="${p.slug}" aria-label="Wishlist">
       ${Wishlist.has(p.slug) ? I.heartFull : I.heart}
     </button>
     <div class="p-card__quick">
-      <button class="btn btn--sm btn--block" data-add="${p.slug}">${I.cart} Add to cart</button>
+      <button class="btn btn--sm btn--block" data-add="${p.slug}"${p.stock === 0 ? ' disabled' : ''}>${I.cart} ${p.stock === 0 ? 'Out of stock' : 'Add to cart'}</button>
     </div>
     <div class="p-card__body">
       <span class="p-card__cat">${catName(p.category)}</span>
       <h3 class="p-card__name"><a href="product.html?slug=${p.slug}">${p.name}</a></h3>
-      <div class="rating">${stars} <span>${p.rating.toFixed(1)} (${p.reviews})</span></div>
+      ${rating}
       <div class="p-card__price">
         <span class="price-now">${money(p.price)}</span>
         ${p.oldPrice ? `<span class="price-old">${money(p.oldPrice)}</span><span class="price-off">-${off(p)}%</span>` : ''}
@@ -503,40 +507,74 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   /* page specific */
   if ($('#home-featured')) {
-    $('#home-featured').innerHTML = PRODUCTS.filter((p) => p.badge).concat(PRODUCTS.slice(0, 4)).slice(0, 8).map(productCard).join('');
-    $('#home-new').innerHTML = PRODUCTS.filter((p) => p.id >= 9).concat(PRODUCTS.slice(0, 4)).slice(0, 4).map(productCard).join('');
-    $('#home-reviews').innerHTML = REVIEWS.map(
-      (r) => `
-      <div class="review reveal">
-        <div class="review__stars">${I.star.repeat(r.stars)}</div>
-        <p>“${r.text}”</p>
-        <div class="review__who">
-          <span class="review__avatar">${r.name[0]}</span>
-          <div><strong>${r.name}</strong><span>${r.city} · Verified buyer</span></div>
-        </div>
-      </div>`
-    ).join('');
-    $('#home-journal').innerHTML = JOURNAL.map(
-      (j) => `
-      <article class="p-card reveal">
-        <a class="p-card__media" href="blog.html"><img src="${j.image}" alt="${j.title}" loading="lazy"></a>
-        <div class="p-card__body">
-          <span class="p-card__cat">${j.date}</span>
-          <h3 class="p-card__name">${j.title}</h3>
-          <p style="font-size:.85rem;color:var(--muted);margin:0">${j.excerpt}</p>
-          <a class="link-more" href="blog.html">Read story ${I.chev}</a>
-        </div>
-      </article>`
-    ).join('');
-    $('#cat-grid').innerHTML = CATEGORIES.map(
-      (c) => `
+    const featured = window.BAZNIVO_FEATURED?.length ? window.BAZNIVO_FEATURED : PRODUCTS.slice(0, 8);
+    const fresh = window.BAZNIVO_NEW?.length ? window.BAZNIVO_NEW : PRODUCTS.slice(0, 4);
+    $('#home-featured').innerHTML = featured.slice(0, 8).map((p) => productCard(p)).join('');
+    $('#home-new').innerHTML = fresh.slice(0, 4).map((p) => productCard(p)).join('');
+
+    /* reviews — sirf jab asli feedback ho */
+    const reviews = window.BAZNIVO_REVIEWS?.length
+      ? window.BAZNIVO_REVIEWS
+      : window.BAZNIVO_SOURCE === 'api'
+      ? []
+      : REVIEWS;
+    if (reviews.length) {
+      $('#home-reviews').innerHTML = reviews
+        .map(
+          (r) => `
+        <div class="review reveal">
+          <div class="review__stars">${I.star.repeat(r.stars || 5)}</div>
+          <p>“${r.text}”</p>
+          <div class="review__who">
+            <span class="review__avatar">${(r.name || 'B')[0]}</span>
+            <div><strong>${r.name}</strong><span>${r.city || 'Pakistan'} · Verified buyer</span></div>
+          </div>
+        </div>`
+        )
+        .join('');
+    } else {
+      $('#sec-reviews')?.remove();
+    }
+
+    /* journal — real blog posts */
+    const posts = window.BAZNIVO_POSTS?.length
+      ? window.BAZNIVO_POSTS
+      : JOURNAL.map((j) => ({ ...j, href: 'blog.html' }));
+    if (posts.length) {
+      $('#home-journal').innerHTML = posts
+        .slice(0, 3)
+        .map(
+          (j) => `
+        <article class="p-card p-card--story reveal">
+          <a class="p-card__media" href="${j.href || 'blog.html?slug=' + j.slug}">
+            <img src="${j.image}" alt="${j.title}" loading="lazy">
+          </a>
+          <div class="p-card__body">
+            <span class="p-card__cat">${j.date}</span>
+            <h3 class="p-card__name"><a href="${j.href || 'blog.html?slug=' + j.slug}">${j.title}</a></h3>
+            <p class="p-card__excerpt">${j.excerpt}</p>
+            <a class="link-more" href="${j.href || 'blog.html?slug=' + j.slug}">Read story ${I.chev}</a>
+          </div>
+        </article>`
+        )
+        .join('');
+    } else {
+      $('#sec-journal')?.remove();
+    }
+
+    /* categories — top 6, real covers */
+    $('#cat-grid').innerHTML = CATEGORIES.slice(0, 6)
+      .map(
+        (c) => `
       <a class="cat-card reveal" href="shop.html?category=${c.slug}">
         <img src="${c.image}" alt="${c.name}" loading="lazy">
         <span class="cat-card__label">${c.name} ${I.chev}</span>
       </a>`
-    ).join('');
+      )
+      .join('');
+
     const chips = $('#brand-chips');
-    if (chips) chips.innerHTML = CATEGORIES.map((c) => `<a class="btn btn--ghost btn--sm" href="shop.html?category=${c.slug}">${c.name}</a>`).join('');
+    if (chips) chips.innerHTML = CATEGORIES.slice(0, 6).map((c) => `<a class="btn btn--ghost btn--sm" href="shop.html?category=${c.slug}">${c.name}</a>`).join('');
     watchReveals();
   }
 
@@ -549,14 +587,22 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 /* ----------------------------- shop page ----------------------------- */
-let shopState = { category: [], q: '', sort: 'popular', max: 4000, wish: false };
+let shopState = { category: [], q: '', sort: 'new', max: 100000, wish: false };
 
 function initShop() {
   const params = new URLSearchParams(location.search);
   if (params.get('category')) shopState.category = [params.get('category')];
   if (params.get('q')) shopState.q = params.get('q').toLowerCase();
   if (params.get('wish')) shopState.wish = true;
-  shopState.sort = params.get('sort') || 'popular';
+  const ceiling = Math.max(...PRODUCTS.map((p) => p.price), 1000);
+  shopState.max = Math.ceil(ceiling / 500) * 500;
+  const price = $('#filter-price');
+  if (price) {
+    price.max = shopState.max;
+    price.value = shopState.max;
+    if ($('#price-label')) $('#price-label').textContent = money(shopState.max);
+  }
+  shopState.sort = params.get('sort') || 'new';
 
   const filterWrap = $('#filter-cats');
   if (filterWrap) {
@@ -569,7 +615,6 @@ function initShop() {
     });
   }
 
-  const price = $('#filter-price');
   if (price) {
     price.addEventListener('input', () => {
       shopState.max = Number(price.value);
@@ -607,7 +652,7 @@ function renderShop() {
   else if (shopState.sort === 'high') list.sort((a, b) => b.price - a.price);
   else if (shopState.sort === 'new') list.sort((a, b) => b.id - a.id);
   else if (shopState.sort === 'discount') list.sort((a, b) => off(b) - off(a));
-  else list.sort((a, b) => b.rating * b.reviews - a.rating * a.reviews);
+  else list.sort((a, b) => b.sortId - a.sortId);
 
   $('#shop-count').textContent = `${list.length} products`;
   const chipWrap = $('#active-filters');
@@ -646,13 +691,13 @@ function initProduct() {
   $('#pd-info').innerHTML = `
     <span class="pd__brand">${p.brand}</span>
     <h1>${p.name}</h1>
-    <div class="rating">${I.star.repeat(Math.round(p.rating))} <span>${p.rating.toFixed(1)} · ${p.reviews} reviews</span></div>
+    ${p.reviews > 0 ? `<div class="rating">${I.star.repeat(Math.max(1, Math.round(p.rating)))} <span>${p.rating.toFixed(1)} · ${p.reviews} reviews</span></div>` : '<div class="rating rating--empty"><span>New arrival</span></div>'}
     <div class="pd__price">
       <span class="price-now">${money(p.price)}</span>
       ${p.oldPrice ? `<span class="price-old">${money(p.oldPrice)}</span><span class="chip chip--green">-${off(p)}%</span>` : ''}
     </div>
     <span class="pd__stock">${p.stock > 0 ? 'In stock — ready to ship' : 'Out of stock'}</span>
-    <p class="pd__desc">${p.desc}</p>
+    <p class="pd__desc">${p.desc || p.blurb}</p>
     ${p.shades.length ? `<div class="shades">${p.shades
       .map((s, i) => `<button class="shade${i === 0 ? ' is-live' : ''}" style="background:${s}" aria-label="Shade ${i + 1}"></button>`)
       .join('')}<span style="font-size:.82rem;color:var(--muted)">${p.shades.length} shades</span></div>` : ''}
@@ -675,16 +720,24 @@ function initProduct() {
         <summary>Description</summary>
         <div class="acc__body"><p>${p.blurb}</p></div>
       </details>
-      <details>
+      ${
+        Object.keys(p.specs || {}).length
+          ? `<details>
         <summary>Specifications</summary>
         <div class="acc__body"><ul>${Object.entries(p.specs)
           .map(([k, v]) => `<li><strong>${k}:</strong> ${v}</li>`)
           .join('')}</ul></div>
-      </details>
-      <details>
-        <summary>Kaise lagayein</summary>
+      </details>`
+          : ''
+      }
+      ${
+        p.howTo?.length
+          ? `<details>
+        <summary>Kaise istemal karein</summary>
         <div class="acc__body"><ul>${p.howTo.map((h) => `<li>${h}</li>`).join('')}</ul></div>
-      </details>
+      </details>`
+          : ''
+      }
       <details>
         <summary>Delivery &amp; returns</summary>
         <div class="acc__body">

@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Beauty Journal | Baznivo</title>
-<meta name="description" content="Makeup tips, product guides aur skincare basics — Baznivo beauty journal.">
+<title>Journal | Baznivo</title>
+<meta name="description" content="Baznivo Journal — styling tips, product guides aur buying advice.">
 <meta name="theme-color" content="#33065c">
 <link rel="icon" href="assets/img/logo.png">
 <link rel="stylesheet" href="css/styles.css">
@@ -15,45 +15,22 @@
 
 <div class="page-head">
   <div class="container">
-    <h1>Beauty Journal</h1>
-    <div class="crumbs"><a href="index.html">Home</a> / <span>Blog</span></div>
+    <h1 id="blog-title">Journal</h1>
+    <div class="crumbs" id="blog-crumbs"><a href="index.html">Home</a> / <span>Journal</span></div>
   </div>
 </div>
 
-<section class="section">
+<section class="section" id="blog-list-wrap">
   <div class="container">
     <div class="grid-products" id="blog-grid" style="grid-template-columns:repeat(3,1fr)"></div>
   </div>
 </section>
 
-<section class="section section--lilac">
-  <div class="container prose" style="max-width:820px">
-    <h2>Beginners ke liye 5 makeup essentials</h2>
-    <p>
-      Bohat saare products ki zaroorat nahi. Ek clean, roz ke look ke liye ye 5 cheezein kaafi hain:
-    </p>
-    <ul>
-      <li><strong>Foundation ya BB cream</strong> — base jo skin tone se match kare.</li>
-      <li><strong>Concealer</strong> — dark circles aur chhote blemishes ke liye.</li>
-      <li><strong>Kajal / eyeliner</strong> — aankhon ko define karne ke liye.</li>
-      <li><strong>Lipstick</strong> — ek shade jo aap ke din ke look se match kare.</li>
-      <li><strong>Compact powder</strong> — din bhar shine control ke liye.</li>
-    </ul>
-    <p>Bas itna. Baqi sab baad mein — jab aap ko khud pata chal jaye ke aap ka look kya hai.</p>
-
-    <h2>Long-wear lipstick: 6 ghante kaise chalayein</h2>
-    <ul>
-      <li>Honton ko pehle scrub aur moisturise karein — lipstick smooth baithti hai.</li>
-      <li>Lip liner se poore hont bharein, phir lipstick lagayein.</li>
-      <li>Ek tissue se daba kar halka powder lagayein, phir dobara ek layer.</li>
-      <li>Khane se pehle sirf centre saaf karein, poora nahi.</li>
-    </ul>
-
-    <h2>Brush care 101</h2>
-    <p>
-      Gande brushes na sirf product waste karte hain, balke skin par breakouts bhi la sakte hain.
-      Har hafte halke shampoo se dho lein, bristles ko neeche rakh kar dry karein aur shape hold karein.
-    </p>
+<section class="section" id="blog-post-wrap" hidden>
+  <div class="container prose" style="max-width:780px">
+    <img id="post-image" alt="" style="width:100%;max-height:440px;object-fit:cover;border-radius:18px;margin-bottom:1.6rem">
+    <div id="post-body"></div>
+    <p style="margin-top:2rem"><a class="btn btn--ghost btn--sm" href="blog.html">← Saari stories</a></p>
   </div>
 </section>
 
@@ -62,18 +39,52 @@
 <script src="js/api.js"></script>
 <script src="js/app.js"></script>
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('DOMContentLoaded', async () => {
+    try { if (window.BAZNIVO_API_READY) await window.BAZNIVO_API_READY; } catch {}
+
+    const slug = new URLSearchParams(location.search).get('slug');
     const grid = document.getElementById('blog-grid');
-    grid.innerHTML = JOURNAL.map(j => `
-      <article class="p-card reveal">
-        <a class="p-card__media" href="blog.html"><img src="${j.image}" alt="${j.title}" loading="lazy"></a>
+
+    const asCard = (j) => `
+      <article class="p-card p-card--story reveal">
+        <a class="p-card__media" href="blog.html?slug=${j.slug}">
+          <img src="${j.image}" alt="${j.title}" loading="lazy">
+        </a>
         <div class="p-card__body">
-          <span class="p-card__cat">${j.date}</span>
-          <h3 class="p-card__name">${j.title}</h3>
-          <p style="font-size:.85rem;color:var(--muted);margin:0">${j.excerpt}</p>
-          <a class="link-more" href="blog.html">Read story →</a>
+          <span class="p-card__cat">${j.date || ''}</span>
+          <h3 class="p-card__name"><a href="blog.html?slug=${j.slug}">${j.title}</a></h3>
+          <p class="p-card__excerpt">${j.excerpt || ''}</p>
+          <a class="link-more" href="blog.html?slug=${j.slug}">Read story →</a>
         </div>
-      </article>`).join('');
+      </article>`;
+
+    if (slug && window.BAZNIVO_getPost) {
+      const post = await window.BAZNIVO_getPost(slug);
+      if (post) {
+        document.getElementById('blog-list-wrap').hidden = true;
+        document.getElementById('blog-post-wrap').hidden = false;
+        document.getElementById('blog-title').textContent = post.title;
+        document.getElementById('blog-crumbs').innerHTML =
+          `<a href="index.html">Home</a> / <a href="blog.html">Journal</a> / <span>${post.title}</span>`;
+        document.title = post.title + ' | Baznivo Journal';
+        const img = document.getElementById('post-image');
+        if (post.image) img.src = post.image; else img.remove();
+        const paras = (post.body || post.excerpt || '')
+          .split(/\n{1,}/)
+          .filter(Boolean)
+          .map((t) => `<p>${t}</p>`)
+          .join('');
+        document.getElementById('post-body').innerHTML = `<p class="p-card__cat">${post.date} · ${post.author}</p>${paras}`;
+        window.watchReveals && window.watchReveals();
+        return;
+      }
+    }
+
+    const posts = (window.BAZNIVO_POSTS && window.BAZNIVO_POSTS.length)
+      ? window.BAZNIVO_POSTS
+      : JOURNAL.map((j) => ({ ...j, slug: j.slug || 'story' }));
+    grid.innerHTML = posts.map(asCard).join('') ||
+      '<div class="empty" style="grid-column:1/-1"><p><strong>Abhi koi story publish nahi hui.</strong></p></div>';
     window.watchReveals && window.watchReveals();
   });
 </script>
