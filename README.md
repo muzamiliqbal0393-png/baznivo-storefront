@@ -1,150 +1,73 @@
-# BAZNIVO — Makeup & Beauty Storefront
+# Baznivo — storefront
 
-Purple/pink beauty storefront for the Pakistani market. **Static site** (HTML + CSS + vanilla JS), koi build step nahi — GitHub par push karein, Vercel khud deploy kar dega.
+Static storefront for **Baznivo**, deployed on Vercel at `https://baznivo-storefront.vercel.app`.
+The catalogue, categories, settings and journal come from the live Baznivo API, so products and
+orders stay in sync with the existing dashboard.
 
-Live preview: **https://baznivo-storefront.vercel.app** *(deploy ke baad)*
+## Pages
 
----
+| File | Purpose |
+| --- | --- |
+| `index.html` | Home — hero slider (5 slides), categories, best sellers, offer banner, new arrivals, journal |
+| `shop.html` | Catalogue with filters (category, price), sorting and collapsible mobile filters |
+| `product.html` | Product detail, gallery, specs, related products |
+| `wishlist.html` | Saved products (local storage) |
+| `checkout.html` | Order form with cash on delivery / JazzCash / EasyPaisa selection |
+| `order-success.html` | Order confirmation + WhatsApp handoff |
+| `blog.html` | Journal index and article view (`blog.html?slug=…`) |
+| `about.html`, `contact.html`, `404.html` | Supporting pages |
+| `admin.html` | Storefront admin dashboard (see below) |
 
-## Features (sab kaam karte hain)
+## Admin dashboard
 
-| Feature | Detail |
-|---|---|
-| Hero slider | 3 slides, auto-rotate + arrows + dots |
-| Shop by Category | 6 category tiles, har tile apni category page par |
-| Catalog + filters | Category, price slider, sort (best selling / new / price / discount), search |
-| Product detail | Gallery + thumbnails, shades, specs accordion, qty selector, stock, related products |
-| Cart drawer | Add / qty +- / remove, localStorage, free delivery Rs 2,500+ |
-| Coupon | `CASTMATICS10` — 10% off, minimum Rs 1,500 |
-| Checkout | Poora form (naam, phone, address, city), COD / JazzCash / EasyPaisa, live order summary |
-| Order record | Order browser mein save + **order-success page** with order # aur delivery timeline |
-| Wishlist | Product card par dil, alag `wishlist.html` page, badge count |
-| WhatsApp | Floating button, order message, product par "Buy on WhatsApp", contact form |
-| Content | About, Beauty Journal (3 posts), Contact + FAQ |
-| SEO & PWA | Meta/OG tags, `sitemap.xml`, `robots.txt`, `site.webmanifest`, 404 page |
-| Responsive | 4 → 3 → 2 column grid, mobile drawer menu, sticky header |
-| A11y | Focus states, `prefers-reduced-motion` support, semantic landmarks |
+Open `/admin.html`. Default passcode: `baznivo` (change it in **Store settings**).
 
----
+It manages:
 
-## Structure
+- **Hero slider** — up to 5 slides, image (URL or upload), label, headline, subheading, up to two
+  buttons, slide order, and rotation speed (default **2 seconds**).
+- **Offers & content** — announcement bar lines and the homepage offer banner.
+- **Featured products** — which products appear under “Best sellers”.
+- **Store settings** — store name, tagline, WhatsApp number, email, city, free-delivery threshold,
+  currency, admin passcode.
+- **Backup & publish** — export/import the config as JSON.
 
-```
-.
-├── index.html            Home
-├── shop.html             Shop + filters
-├── product.html          Product detail (?slug=...)
-├── wishlist.html         Saved products
-├── checkout.html         Checkout form + summary
-├── order-success.html    Order confirmation (?order=...)
-├── about.html  blog.html  contact.html  404.html
-├── css/styles.css        Poora theme
-├── js/data.js            ★ STORE, CATEGORIES, PRODUCTS, REVIEWS, JOURNAL
-├── js/app.js             Header/footer, cart, wishlist, checkout, orders, shop & product logic
-├── assets/img/           Logo, hero, product photos
-├── robots.txt  sitemap.xml  site.webmanifest  vercel.json  package.json
-```
+Edits are stored in the browser (`localStorage → baznivo-site-config`). To publish them for every
+visitor, download the config and replace the `DEFAULT_SITE_CONFIG` object in `js/site-config.js`,
+then redeploy. Products, prices, stock and orders are managed in the existing Baznivo dashboard
+(`https://baznivo.vercel.app/admin`) — this panel links to it directly.
 
-### Content edit karna
+## Live API integration
 
-Sab kuch **`js/data.js`** mein hai:
+- `js/api.js` fetches `/api/products`, `/api/categories`, `/api/settings`, `/api/blog` and
+  `/api/reviews` on boot and maps them onto the site's data shape.
+- `vercel.json` rewrites `/api/*` to the live API and `/media/*` to the live `assets/*`.
+  The `/media` proxy is required because the source images are served with
+  `cross-origin-resource-policy: same-origin`, which blocks direct hotlinking.
+- `js/data.js` is a bundled fallback catalogue (used when the API is unreachable, or with `?mock=1`).
+  `?rawcats=1` shows the API's original categories.
+- Prices arrive in minor units (paisa). Values below 100 are treated as rupees entered by mistake and
+  corrected; corrupt regular prices (more than 5× the sale price) are hidden.
+- Category groups are derived from product names (`CATEGORY_RULES` in `js/api.js`) because the live
+  categories are mixed up. Remove that layer once the API categories are fixed.
 
-```js
-const STORE = { name, tagline, whatsapp, email, freeShipAt, ... };
-const CATEGORIES = [ { slug, name, image, blurb }, ... ];
-const PRODUCTS = [ {
-  id, slug, name, brand, category,
-  price, oldPrice, image, gallery: [...],
-  badge, rating, reviews, stock, shades: [...],
-  blurb, desc, specs: {}, howTo: [...]
-}, ... ];
-```
-
-Naya product = ek object copy karein. Naya category = `CATEGORIES` mein entry (slug wahi rakhein jo product mein use hua hai).
-
----
-
-## Local par chalana
+## Local development
 
 ```bash
-# koi bhi static server chal jayega
-npx serve .          # http://localhost:3000
-# ya
-python3 -m http.server 8000
+python3 tools/serve.py 4173     # serves site/ and proxies /api and /media to the live API
 ```
 
----
-
-## Deploy — GitHub + Vercel
-
-### 1) GitHub repo banayein
+## Deployment
 
 ```bash
-cd site                       # is folder ke andar
-git init
-git add .
-git commit -m "Baznivo makeup storefront"
-git branch -M main
-git remote add origin https://github.com/<USERNAME>/baznivo-storefront.git
-git push -u origin main
+vercel --prod --project baznivo-storefront --scope <team>
 ```
 
-### 2) Vercel par import karein
+Vercel serves the static files directly; no build step is required.
 
-1. https://vercel.com/new par jayein
-2. **Import Git Repository** → `baznivo-storefront` select karein
-3. Framework preset: **Other** · Build command: *(khali)* · Output directory: *(khali — root)*
-4. **Deploy** dabayein → 30 second mein link mil jayega: `https://baznivo-storefront.vercel.app`
+## Notes
 
-**Ya** CLI se (ek hi command):
-
-```bash
-npm i -g vercel
-vercel --prod          # pehli dafa login + project setup poochhega
-```
-
-### 3) Custom domain
-
-Vercel → Project → **Settings → Domains** → apna domain add karein → DNS mein `A 76.76.21.21` (ya `CNAME cname.vercel-dns.com`).
-
----
-
-## Badalne wali cheezein deploy se pehle
-
-- [ ] `js/data.js` → `STORE.whatsapp` (`923154120584`), email, free-delivery limit
-- [ ] Real Castmatics product names, prices, stock, shades
-- [ ] Product photos `assets/img/` mein daal kar `data.js` mein file names update
-- [ ] `sitemap.xml` aur `robots.txt` mein apna asli domain
-- [ ] Footer ke social links (Instagram / Facebook / TikTok)
-- [ ] Google Analytics / Meta Pixel agar chahiye
-
----
-
-## Backend se joDna (aage ka rasta)
-
-Filhal orders browser mein save hote hain aur WhatsApp par confirm hote hain (COD stores ke liye sab se aam tareeqa).
-Jab backend ready ho to sirf 3 jagah change karna hoga:
-
-1. **`js/data.js`** — hard-coded arrays ki jagah API se fetch (e.g. `GET /api/products`).
-2. **`initCheckout()`** in `js/app.js` — order object `POST /api/orders` par bhejein.
-3. **Cart / wishlist** — localStorage ki jagah server cart (optional).
-
-Baqi UI, design aur pages waise hi rahenge.
-
-## Live API integration (data source)
-
-- `js/api.js` boot par `https://baznivo.vercel.app/api/*` se catalog/categories/settings/blog/reviews leta hai.
-- `vercel.json` rewrites: `/api/*` → live API, `/media/*` → live `assets/*`.
-  `/media` proxy zaroori hai kyunki live site images `cross-origin-resource-policy: same-origin`
-  bhejti hai — direct hotlink browser block kar deta hai.
-- Bundled `js/data.js` sirf fallback hai; `?mock=1` se force hota hai, `?rawcats=1` se API ki
-  asli (mixed) categories dikhti hain.
-- Category groups product name keywords se bante hain (`CATEGORY_RULES` in `js/api.js`) kyunki
-  API mein categories gadbad hain. Admin theek hone par yeh layer hata dein.
-- Prices paisa (minor units) mein aati hain; agar value < 100 likhi ho to rupees maan kar fix hoti hai.
-
-## Mobile
-
-- `--cols` CSS variable grid (4 / 3 / 2 columns).
-- Shop filters 980px se neeche collapsible `<details>`.
-- Product card ka add-to-cart mobile par body ke neeche (price ke oopar nahi).
+- Mobile: 4/3/2 column grid via the `--cols` CSS variable, collapsible shop filters below 980px,
+  inline add-to-cart on cards below 700px.
+- Accessibility: keyboard-reachable controls, `aria-label`s on icon buttons, reduced-motion users
+  get a static hero (no autoplay).

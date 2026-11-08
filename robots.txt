@@ -1,6 +1,2 @@
 User-agent: *
-Allow: /
-Disallow: /checkout.html
-Disallow: /order-success.html
-
-Sitemap: https://baznivo-storefront.vercel.app/sitemap.xml
+Disallow: /admin.html

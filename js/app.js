@@ -6,6 +6,8 @@
 const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
 
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const CFG = () => window.BAZNIVO_CONFIG || {};
 const money = (n) => STORE.currency + ' ' + Number(n).toLocaleString('en-US');
 const off = (p) => (p.oldPrice ? Math.round((1 - p.price / p.oldPrice) * 100) : 0);
 const bySlug = (slug) => PRODUCTS.find((p) => p.slug === slug);
@@ -109,6 +111,31 @@ const Wishlist = {
 };
 
 /* ----------------------------- header / footer ----------------------------- */
+
+/* ----------------------------- site config ----------------------------- */
+function applyConfig() {
+  const c = CFG();
+  if (c.store) {
+    Object.entries(c.store).forEach(([k, v]) => {
+      if (v !== undefined && v !== null && v !== '') STORE[k] = v;
+    });
+  }
+  const promo = c.promo;
+  const promoEl = $('#promo');
+  if (promo && promoEl) {
+    promoEl.innerHTML = `
+      <div class="promo__in">
+        <span class="promo__kicker">${promo.kicker || 'Offer'}</span>
+        <h2>${promo.title || ''}</h2>
+        <p>${promo.text || ''}</p>
+        <div class="promo__actions">
+          <a class="btn btn--white" href="${promo.href || 'shop.html'}">${promo.cta || 'Shop now'}</a>
+          <a class="btn btn--onDark" href="contact.html">Ask a question</a>
+        </div>
+      </div>`;
+  }
+}
+
 function headerHTML(active) {
   const navItem = (href, label, key) =>
     `<a class="nav__link${active === key ? ' is-active' : ''}" href="${href}">${label}</a>`;
@@ -121,12 +148,13 @@ function headerHTML(active) {
   <div class="topbar">
     <div class="container topbar__in">
       <div class="topbar__list">
-        <span class="topbar__item">${I.truck} Free Delivery on Orders Above ${money(STORE.freeShipAt)}</span>
-        <span class="topbar__item">${I.tag} Best Prices Guaranteed</span>
-        <span class="topbar__item">${I.shield} Secure &amp; Easy Payments</span>
+        ${(CFG().announcement?.length ? CFG().announcement : ['Free delivery on orders over ' + money(STORE.freeShipAt)])
+          .slice(0, 3)
+          .map((t, i) => `<span class="topbar__item">${[I.truck, I.tag, I.shield][i] || I.shield} ${t}</span>`)
+          .join('')}
       </div>
       <div class="topbar__socials">
-        <a href="${cartUrl('Assalam o Alaikum!')}" aria-label="WhatsApp" target="_blank" rel="noopener">${I.wa}</a>
+        <a href="${cartUrl('Hello Baznivo!')}" aria-label="WhatsApp" target="_blank" rel="noopener">${I.wa}</a>
         <a href="#" aria-label="TikTok">${I.tt}</a>
         <a href="#" aria-label="Instagram">${I.ig}</a>
         <a href="#" aria-label="Facebook">${I.fb}</a>
@@ -199,7 +227,7 @@ function footerHTML() {
     <div class="container footer__top">
       <div class="footer__brand">
         <img src="assets/img/logo.png" alt="Baznivo">
-        <p>Baznivo — curated everyday essentials: fashion, beauty, tech aur home. Original products, cash on delivery poore Pakistan mein.</p>
+        <p>Baznivo is a Pakistan-based online store for everyday essentials — fashion, beauty, tech and home. Genuine products, transparent pricing and cash on delivery nationwide.</p>
         <div class="footer__contact">
           <span>${I.pin} ${STORE.city}</span>
           <span>${I.mail} ${STORE.email}</span>
@@ -224,10 +252,10 @@ function footerHTML() {
         </ul>
       </div>
       <div>
-        <h4>Order karein</h4>
-        <p style="font-size:.88rem">WhatsApp par order ya sawal — turant jawab.</p>
-        <a class="btn btn--sm" href="${cartUrl('Assalam o Alaikum! Mujhe order karna hai.')}" target="_blank" rel="noopener" style="margin-top:.6rem">
-          ${I.wa} WhatsApp par order
+        <h4>Order &amp; support</h4>
+        <p style="font-size:.88rem">Order on WhatsApp or ask a question — we reply fast.</p>
+        <a class="btn btn--sm" href="${cartUrl('Hello Baznivo! I would like to place an order.')}" target="_blank" rel="noopener" style="margin-top:.6rem">
+          ${I.wa} Order on WhatsApp
         </a>
         <div class="footer__pay">
           <span>Cash on Delivery</span><span>JazzCash</span><span>EasyPaisa</span><span>Bank Transfer</span>
@@ -236,7 +264,7 @@ function footerHTML() {
     </div>
     <div class="container footer__bottom">
       <span>© ${new Date().getFullYear()} Baznivo. All rights reserved.</span>
-      <span>Original products · 14-day easy returns · Nationwide delivery</span>
+      <span>Genuine products · 7-day returns · Nationwide delivery · <a href="admin.html" style="color:#c9a7dd">Admin</a></span>
     </div>
   </footer>`;
 }
@@ -246,14 +274,14 @@ function cartDrawerHTML() {
   <div class="overlay" id="overlay"></div>
   <aside class="drawer" id="cart-drawer" aria-label="Shopping cart">
     <div class="drawer__head">
-      <h3>Aap ka cart</h3>
+      <h3>Your cart</h3>
       <button class="icon-btn" data-cart-close aria-label="Close cart">${I.close}</button>
     </div>
     <div class="drawer__body" id="cart-body"></div>
     <div class="drawer__foot" id="cart-foot"></div>
   </aside>
   <div class="toast-wrap" id="toasts"></div>
-  <a class="wa-float" href="${cartUrl('Assalam o Alaikum! Baznivo par products ke bare mein poochna hai.')}" target="_blank" rel="noopener" aria-label="WhatsApp">
+  <a class="wa-float" href="${cartUrl('Hello Baznivo! I have a question about a product.')}" target="_blank" rel="noopener" aria-label="WhatsApp">
     ${I.wa}<span>Chat with us</span>
   </a>`;
 }
@@ -291,7 +319,7 @@ function renderCart() {
   if (!body) return;
 
   if (!Cart.items.length) {
-    body.innerHTML = `<div class="cart-empty"><p><strong>Aap ka cart khali hai.</strong></p><p style="font-size:.86rem">Products shamil karein aur shopping shuru karein.</p><a class="btn btn--sm" href="shop.html">Shop now</a></div>`;
+    body.innerHTML = `<div class="cart-empty"><p><strong>Your cart is empty.</strong></p><p style="font-size:.86rem">Add a product to get started.</p><a class="btn btn--sm" href="shop.html">Start shopping</a></div>`;
     foot.innerHTML = '';
     return;
   }
@@ -306,9 +334,9 @@ function renderCart() {
         <div>
           <div class="line-item__name">${p.name}</div>
           <div class="line-item__qty">
-            <button data-qty="-1" data-slug="${p.slug}" aria-label="Kam karein">−</button>
+            <button data-qty="-1" data-slug="${p.slug}" aria-label="Decrease quantity">−</button>
             <span>${line.qty}</span>
-            <button data-qty="1" data-slug="${p.slug}" aria-label="Barhayein">+</button>
+            <button data-qty="1" data-slug="${p.slug}" aria-label="Increase quantity">+</button>
           </div>
           <button class="line-item__remove" data-remove="${p.slug}">Remove</button>
         </div>
@@ -328,8 +356,8 @@ function renderCart() {
       <div class="totals__row totals__row--grand"><span>Total</span><span>${money(total)}</span></div>
     </div>
     <a class="btn btn--block" href="checkout.html">Checkout &mdash; ${money(total)}</a>
-    <a class="btn btn--ghost btn--block" href="${cartUrl(orderMessage())}" target="_blank" rel="noopener" style="margin-top:.5rem">${I.wa} WhatsApp par order</a>
-    <p class="cart-note">Cash on delivery available. Order confirm hone par hum WhatsApp par tracking bhejte hain.</p>`;
+    <a class="btn btn--ghost btn--block" href="${cartUrl(orderMessage())}" target="_blank" rel="noopener" style="margin-top:.5rem">${I.wa} Order on WhatsApp</a>
+    <p class="cart-note">Cash on delivery available. Once your order is confirmed we send tracking on WhatsApp.</p>`;
 }
 
 function orderMessage() {
@@ -339,7 +367,7 @@ function orderMessage() {
   }).filter(Boolean);
   const sub = Cart.subtotal();
   return (
-    'Assalam o Alaikum! Mujhe ye order karna hai:\n\n' +
+    'Hello Baznivo! I would like to place this order:\n\n' +
     lines.join('\n') +
     `\n\nSubtotal: ${money(sub)}\n\nNaam:\nAddress:\nCity:\nPhone:`
   );
@@ -356,6 +384,83 @@ function closeCart() {
   $('#overlay')?.classList.remove('is-open');
   $('#mobile-nav')?.classList.remove('is-open');
   document.body.style.overflow = '';
+}
+
+
+/* ----------------------------- hero slider ----------------------------- */
+function initHero() {
+  const mount = $('#hero-slides');
+  if (!mount) return;
+  const cfg = window.BAZNIVO_CONFIG?.hero || {};
+  const slides = (cfg.slides || []).filter((sl) => sl && sl.image);
+  if (!slides.length) return;
+
+  mount.innerHTML = slides
+    .map(
+      (sl, i) => `
+    <div class="hero__slide${sl.layout === 'split' ? ' hero__slide--split' : ''}${i === 0 ? ' is-live' : ''}" role="group" aria-roledescription="slide" aria-label="Slide ${i + 1} of ${slides.length}">
+      <div class="hero__media">
+        <img src="${sl.image}" alt="${(sl.title || 'Baznivo').replace(/"/g, '')}"${i ? ' loading="lazy"' : ''} style="object-position:${sl.focus || 'center'}">
+      </div>
+      <div class="container hero__in">
+        <div class="hero__content">
+          <img class="hero__mark" src="assets/img/logo-white.png" alt="Baznivo">
+          ${sl.kicker ? `<div class="hero__tagline">${sl.kicker}</div>` : ''}
+          ${i === 0 ? `<h1 class="hero__title">${sl.title || ''}</h1>` : `<p class="hero__title">${sl.title || ''}</p>`}
+          ${sl.sub ? `<p class="hero__sub">${sl.sub}</p>` : ''}
+          <div class="hero__actions">
+            ${sl.cta ? `<a class="btn btn--white" href="${sl.href || 'shop.html'}">${sl.cta}</a>` : ''}
+            ${sl.cta2 ? `<a class="btn btn--onDark" href="${sl.href2 || 'shop.html'}">${sl.cta2}</a>` : ''}
+          </div>
+        </div>
+      </div>
+    </div>`
+    )
+    .join('');
+
+  const els = $$('.hero__slide', mount);
+  const dotsWrap = $('#hero-dots');
+  if (dotsWrap && els.length > 1) {
+    dotsWrap.innerHTML = els
+      .map((_, i) => `<button class="hero__dot${i === 0 ? ' is-live' : ''}" data-slide="${i}" role="tab" aria-label="Go to slide ${i + 1}"></button>`)
+      .join('');
+  }
+
+  let idx = 0;
+  let timer = null;
+  const interval = Math.max(1200, Number(cfg.interval) || 2000);
+  const show = (i) => {
+    idx = (i + els.length) % els.length;
+    els.forEach((el, n) => el.classList.toggle('is-live', n === idx));
+    $$('.hero__dot', dotsWrap || document).forEach((d, n) => d.classList.toggle('is-live', n === idx));
+  };
+  const start = () => {
+    if (els.length < 2 || reduceMotion) return;
+    stop();
+    timer = setInterval(() => show(idx + 1), interval);
+  };
+  const stop = () => timer && clearInterval(timer);
+
+  $('#hero-prev')?.addEventListener('click', () => {
+    show(idx - 1);
+    start();
+  });
+  $('#hero-next')?.addEventListener('click', () => {
+    show(idx + 1);
+    start();
+  });
+  dotsWrap?.addEventListener('click', (e) => {
+    const d = e.target.closest('[data-slide]');
+    if (!d) return;
+    show(Number(d.dataset.slide));
+    start();
+  });
+
+  const heroEl = $('#hero');
+  heroEl?.addEventListener('mouseenter', stop);
+  heroEl?.addEventListener('mouseleave', start);
+  heroEl?.addEventListener('focusin', stop);
+  start();
 }
 
 /* ----------------------------- product card ----------------------------- */
@@ -401,6 +506,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const SRC = window.BAZNIVO_SOURCE === 'api' ? 'API' : 'mock';
   console.info('[Baznivo] catalog source:', SRC, '| products:', PRODUCTS.length);
   const page = document.body.dataset.page || 'home';
+
+  applyConfig();
 
   const headerMount = $('#site-header');
   if (headerMount) headerMount.innerHTML = headerHTML(page);
@@ -485,29 +592,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     const form = e.target.closest('[data-newsletter]');
     if (!form) return;
     e.preventDefault();
-    toast('Shukriya! Aap newsletter mein shamil ho gaye.');
+    toast('Thanks — you are subscribed.');
     form.reset();
   });
 
-  /* hero slider */
-  const heroSlides = $$('.hero__slide');
-  if (heroSlides.length) {
-    let idx = 0;
-    const dots = $$('.hero__dot');
-    const show = (i) => {
-      idx = (i + heroSlides.length) % heroSlides.length;
-      heroSlides.forEach((s, n) => s.classList.toggle('is-live', n === idx));
-      dots.forEach((d, n) => d.classList.toggle('is-live', n === idx));
-    };
-    $('[data-hero-prev]')?.addEventListener('click', () => show(idx - 1));
-    $('[data-hero-next]')?.addEventListener('click', () => show(idx + 1));
-    dots.forEach((d, n) => d.addEventListener('click', () => show(n)));
-    setInterval(() => show(idx + 1), 7000);
-  }
+  /* hero slider (admin-managed, default 2s) */
+  initHero();
 
   /* page specific */
   if ($('#home-featured')) {
-    const featured = window.BAZNIVO_FEATURED?.length ? window.BAZNIVO_FEATURED : PRODUCTS.slice(0, 8);
+    const pinned = (CFG().featured || []).map((slug) => bySlug(slug)).filter(Boolean);
+    const featured = pinned.length ? pinned : window.BAZNIVO_FEATURED?.length ? window.BAZNIVO_FEATURED : PRODUCTS.slice(0, 8);
     const fresh = window.BAZNIVO_NEW?.length ? window.BAZNIVO_NEW : PRODUCTS.slice(0, 4);
     $('#home-featured').innerHTML = featured.slice(0, 8).map((p) => productCard(p)).join('');
     $('#home-new').innerHTML = fresh.slice(0, 4).map((p) => productCard(p)).join('');
@@ -669,7 +764,7 @@ function renderShop() {
 
   grid.innerHTML = list.length
     ? list.map(productCard).join('')
-    : `<div class="empty" style="grid-column:1/-1"><p><strong>Koi product nahi mila.</strong></p><p>Filters change karein ya saara catalog dekhein.</p><a class="btn btn--sm" href="shop.html">All products</a></div>`;
+    : `<div class="empty" style="grid-column:1/-1"><p><strong>No products found.</strong></p><p>Try different filters or browse the full catalogue.</p><a class="btn btn--sm" href="shop.html">All products</a></div>`;
   window.watchReveals?.();
 }
 
@@ -706,12 +801,12 @@ function initProduct() {
       .join('')}<span style="font-size:.82rem;color:var(--muted)">${p.shades.length} shades</span></div>` : ''}
     <div class="pd__buy">
       <div class="qty">
-        <button data-pd-qty="-1" aria-label="Kam karein">−</button>
+        <button data-pd-qty="-1" aria-label="Decrease quantity">−</button>
         <span id="pd-qty">1</span>
-        <button data-pd-qty="1" aria-label="Barhayein">+</button>
+        <button data-pd-qty="1" aria-label="Increase quantity">+</button>
       </div>
       <button class="btn" data-add="${p.slug}">${I.cart} Add to cart</button>
-      <a class="btn btn--ghost" href="${cartUrl('Assalam o Alaikum! Mujhe ye product chahiye: ' + p.name + ' (' + money(p.price) + ')')}" target="_blank" rel="noopener">${I.wa} Buy on WhatsApp</a>
+      <a class="btn btn--ghost" href="${cartUrl('Hello Baznivo! I am interested in: ' + p.name + ' (' + money(p.price) + ')')}" target="_blank" rel="noopener">${I.wa} Buy on WhatsApp</a>
     </div>
     <div class="pd__meta">
       <span>${I.truck} Free delivery on orders above ${money(STORE.freeShipAt)}</span>
@@ -736,7 +831,7 @@ function initProduct() {
       ${
         p.howTo?.length
           ? `<details>
-        <summary>Kaise istemal karein</summary>
+        <summary>How to use</summary>
         <div class="acc__body"><ul>${p.howTo.map((h) => `<li>${h}</li>`).join('')}</ul></div>
       </details>`
           : ''
@@ -744,7 +839,7 @@ function initProduct() {
       <details>
         <summary>Delivery &amp; returns</summary>
         <div class="acc__body">
-          <p>Poore Pakistan mein delivery, 2–4 working days. Cash on delivery available. Product pasand na aaye to 14 din ke andar return request kar sakte hain.</p>
+          <p>Delivery across Pakistan in 2–4 working days. Cash on delivery available. If something is not right, request a return within 14 days.</p>
         </div>
       </details>
     </div>`;
@@ -786,7 +881,7 @@ function initContact() {
   form?.addEventListener('submit', (e) => {
     e.preventDefault();
     const data = new FormData(form);
-    const msg = `Assalam o Alaikum! Naam: ${data.get('name')}\nPhone: ${data.get('phone')}\nEmail: ${data.get('email')}\n\n${data.get('message')}`;
+    const msg = `Hello Baznivo!\nName: ${data.get('name')}\nPhone: ${data.get('phone')}\nEmail: ${data.get('email')}\n\n${data.get('message')}`;
     window.open(cartUrl(msg), '_blank');
     toast('WhatsApp khul raha hai — bas send dabayein.');
   });
@@ -804,8 +899,8 @@ function initWishlist() {
     grid.innerHTML = items.length
       ? items.map(productCard).join('')
       : `<div class="empty" style="grid-column:1/-1">
-           <p><strong>Wishlist khali hai.</strong></p>
-           <p>Product card par dil ke nishan par click karein — wo yahan save ho jayega.</p>
+           <p><strong>Your wishlist is empty.</strong></p>
+           <p>Tap the heart on any product to save it here for later.</p>
            <a class="btn btn--sm" href="shop.html">Shop now</a>
          </div>`;
     window.watchReveals?.();
@@ -867,8 +962,8 @@ function initCheckout() {
       .join('');
 
     $('#summary').innerHTML = `
-      <h3>Aap ka order (${Cart.count()} items)</h3>
-      <div class="summary__items">${items || '<p style="font-size:.85rem;color:var(--muted)">Cart khali hai.</p>'}</div>
+      <h3>Your order (${Cart.count()} items)</h3>
+      <div class="summary__items">${items || '<p style="font-size:.85rem;color:var(--muted)">Your cart is empty.</p>'}</div>
       <div class="coupon-row">
         <input id="coupon" placeholder="Coupon code" value="${couponCode}" aria-label="Coupon code">
         <button class="btn btn--ghost btn--sm" type="button" id="apply-coupon">Apply</button>
@@ -888,8 +983,8 @@ function initCheckout() {
       const c = COUPONS[couponCode.toUpperCase().trim()];
       renderSummary();
       const msg = $('#coupon-msg');
-      if (!c) msg.className = 'form-msg is-bad', (msg.textContent = 'Ye coupon valid nahi hai.');
-      else if (Cart.subtotal() < c.min) msg.className = 'form-msg is-bad', (msg.textContent = `Is coupon ke liye minimum order ${money(c.min)} hai.`);
+      if (!c) msg.className = 'form-msg is-bad', (msg.textContent = 'That coupon code is not valid.');
+      else if (Cart.subtotal() < c.min) msg.className = 'form-msg is-bad', (msg.textContent = `This coupon requires a minimum order of ${money(c.min)}.`);
       else msg.className = 'form-msg is-ok', (msg.textContent = `Coupon lag gaya — ${c.label}`);
     });
     return t;
@@ -900,7 +995,7 @@ function initCheckout() {
   $('#checkout-form')?.addEventListener('submit', (e) => {
     e.preventDefault();
     if (!Cart.items.length) {
-      toast('Cart khali hai — pehle koi product add karein.');
+      toast('Your cart is empty — add a product first.');
       return;
     }
     const fd = new FormData(e.target);
@@ -940,16 +1035,16 @@ function initOrderSuccess() {
   const order = Orders.find(id);
 
   if (!order) {
-    wrap.innerHTML = `<div class="empty"><p><strong>Order nahi mila.</strong></p>
-      <p>Ho sakta hai browser ka data clear ho gaya ho. WhatsApp par apna order confirm karein.</p>
-      <a class="btn btn--sm" href="contact.html">Contact karein</a></div>`;
+    wrap.innerHTML = `<div class="empty"><p><strong>Order not found.</strong></p>
+      <p>Your browser data may have been cleared. Confirm your order on WhatsApp and we will help.</p>
+      <a class="btn btn--sm" href="contact.html">Contact us</a></div>`;
     return;
   }
 
   const t = order.totals;
   const payLabel = { cod: 'Cash on Delivery', jazzcash: 'JazzCash', easypaisa: 'EasyPaisa' }[order.payment] || order.payment;
   const waText =
-    `Assalam o Alaikum! Order confirm karna hai:\nOrder #${order.id}\n\n` +
+    `Hello Baznivo! Please confirm my order:\nOrder #${order.id}\n\n` +
     order.items.map((i, n) => `${n + 1}. ${i.name} x${i.qty} — ${money(i.price * i.qty)}`).join('\n') +
     `\n\nTotal: ${money(t.total)} (${payLabel})\nNaam: ${order.customer.name}\nPhone: ${order.customer.phone}\nAddress: ${order.customer.address}, ${order.customer.city}`;
 
@@ -984,8 +1079,8 @@ function initOrderSuccess() {
   $('#order-wa').href = cartUrl(waText);
 
   $('#order-timeline').innerHTML = `
-    <div class="tl is-done"><div class="tl__dot">${I.check}</div><div><strong>Order mil gaya</strong><span>Aap ka order record ho gaya hai.</span></div></div>
-    <div class="tl"><div class="tl__dot">2</div><div><strong>WhatsApp confirmation</strong><span>Hum aap ko message kar ke confirm karte hain.</span></div></div>
+    <div class="tl is-done"><div class="tl__dot">${I.check}</div><div><strong>Order received</strong><span>Your order has been recorded.</span></div></div>
+    <div class="tl"><div class="tl__dot">2</div><div><strong>WhatsApp confirmation</strong><span>We message you to confirm the details.</span></div></div>
     <div class="tl"><div class="tl__dot">3</div><div><strong>Dispatch</strong><span>2–4 working days, tracking number ke saath.</span></div></div>
     <div class="tl"><div class="tl__dot">4</div><div><strong>Delivered</strong><span>Cash on delivery par payment.</span></div></div>`;
 }

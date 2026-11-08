@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Baznivo Admin — Storefront control panel</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="assets/img/logo.png">
+<link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+
+<!-- ================= GATE ================= -->
+<div id="gate">
+  <form class="gate" id="gate-form">
+    <img src="assets/img/logo.png" alt="Baznivo">
+    <h1>Storefront admin</h1>
+    <p>Enter your passcode to manage the homepage.</p>
+    <div class="field" style="text-align:left">
+      <label class="f" for="gate-pass">Passcode</label>
+      <input id="gate-pass" type="password" autocomplete="current-password" placeholder="••••••••">
+    </div>
+    <button class="btn" type="submit" style="width:100%">Unlock</button>
+    <p style="margin:.9rem 0 0;font-size:.76rem">Default passcode: <code>baznivo</code> — change it in Settings.</p>
+  </form>
+</div>
+
+<!-- ================= APP ================= -->
+<div id="app" hidden>
+  <div class="admin-top">
+    <div class="admin-top__in">
+      <img src="assets/img/logo-white.png" alt="Baznivo">
+      <h1>Storefront admin</h1>
+      <span class="spacer"></span>
+      <a class="btn-top" href="index.html" target="_blank" rel="noopener">View site ↗</a>
+      <a class="btn-top" href="https://baznivo.vercel.app/admin" target="_blank" rel="noopener">Products &amp; orders ↗</a>
+      <button class="btn-top" id="lock">Lock</button>
+    </div>
+  </div>
+
+  <div class="admin-wrap">
+    <div class="admin-grid">
+      <nav class="tabs" id="tabs">
+        <button class="is-active" data-tab="hero">Hero slider</button>
+        <button data-tab="content">Offers &amp; content</button>
+        <button data-tab="featured">Featured products</button>
+        <button data-tab="store">Store settings</button>
+        <button data-tab="data">Backup &amp; publish</button>
+      </nav>
+
+      <div>
+        <!-- ================= HERO ================= -->
+        <section class="panel is-active" data-panel="hero">
+          <div class="card">
+            <h2>Hero slider</h2>
+            <p class="sub">Up to 5 slides. Each slide rotates automatically — set the speed below.</p>
+            <div class="notice">
+              Changes save to this browser instantly. To publish for everyone, open <strong>Backup &amp; publish</strong> and follow the two steps.
+            </div>
+            <div class="row2" style="align-items:end">
+              <div class="field">
+                <label class="f" for="hero-interval">Seconds per slide</label>
+                <input id="hero-interval" type="number" min="1" max="20" step="0.5" value="2">
+              </div>
+              <div class="field">
+                <button class="btn btn--ghost" id="hero-add" type="button" style="width:100%">+ Add slide</button>
+              </div>
+            </div>
+            <div id="slides"></div>
+          </div>
+        </section>
+
+        <!-- ================= CONTENT ================= -->
+        <section class="panel" data-panel="content">
+          <div class="card">
+            <h2>Announcement bar</h2>
+            <p class="sub">The thin bar at the very top of every page. Three short lines.</p>
+            <div id="announce"></div>
+          </div>
+          <div class="card">
+            <h2>Homepage offer banner</h2>
+            <p class="sub">The purple banner in the middle of the homepage.</p>
+            <div class="row2">
+              <div class="field"><label class="f" for="p-kicker">Small label</label><input id="p-kicker" type="text"></div>
+              <div class="field"><label class="f" for="p-code">Coupon code</label><input id="p-code" type="text"></div>
+            </div>
+            <div class="field"><label class="f" for="p-title">Headline</label><input id="p-title" type="text"></div>
+            <div class="field"><label class="f" for="p-text">Body text</label><textarea id="p-text" rows="3"></textarea></div>
+            <div class="row2">
+              <div class="field"><label class="f" for="p-cta">Button label</label><input id="p-cta" type="text"></div>
+              <div class="field"><label class="f" for="p-href">Button link</label><input id="p-href" type="text"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= FEATURED ================= -->
+        <section class="panel" data-panel="featured">
+          <div class="card">
+            <h2>Best sellers on the homepage</h2>
+            <p class="sub">Pick the products you want to promote. Leave all unchecked to use the API's featured products automatically.</p>
+            <div class="btn-row" style="margin-bottom:1rem">
+              <input id="feat-search" type="text" placeholder="Search products…" style="max-width:280px">
+              <button class="btn btn--ghost btn--sm" id="feat-clear" type="button">Clear selection</button>
+              <span id="feat-count" class="slide-card__meta"></span>
+            </div>
+            <div class="pick" id="pick-list"><p class="sub">Loading catalogue…</p></div>
+          </div>
+        </section>
+
+        <!-- ================= STORE ================= -->
+        <section class="panel" data-panel="store">
+          <div class="card">
+            <h2>Store settings</h2>
+            <p class="sub">Used across the site: header, footer, WhatsApp links and delivery maths.</p>
+            <div class="row2">
+              <div class="field"><label class="f" for="s-name">Store name</label><input id="s-name" type="text"></div>
+              <div class="field"><label class="f" for="s-tagline">Tagline</label><input id="s-tagline" type="text"></div>
+            </div>
+            <div class="row2">
+              <div class="field"><label class="f" for="s-wa">WhatsApp number (digits only)</label><input id="s-wa" type="text" placeholder="923001234567"></div>
+              <div class="field"><label class="f" for="s-email">Support email</label><input id="s-email" type="email"></div>
+            </div>
+            <div class="row3">
+              <div class="field"><label class="f" for="s-city">City</label><input id="s-city" type="text"></div>
+              <div class="field"><label class="f" for="s-free">Free delivery above</label><input id="s-free" type="number" min="0" step="100"></div>
+              <div class="field"><label class="f" for="s-currency">Currency</label><input id="s-currency" type="text"></div>
+            </div>
+          </div>
+          <div class="card">
+            <h2>Admin passcode</h2>
+            <p class="sub">This is a client-side gate, not a login. Anyone with the link can view this page — do not store sensitive data here.</p>
+            <div class="field" style="max-width:320px"><label class="f" for="s-pass">Passcode</label><input id="s-pass" type="text"></div>
+          </div>
+        </section>
+
+        <!-- ================= DATA ================= -->
+        <section class="panel" data-panel="data">
+          <div class="card">
+            <h2>Backup &amp; publish</h2>
+            <p class="sub">Your edits are stored in this browser. To make them live for every visitor, export the config and replace the defaults file.</p>
+            <ol style="font-size:.9rem;padding-left:1.1rem">
+              <li>Click <strong>Download config</strong> — you get <code>site-config.json</code>.</li>
+              <li>Send it to your developer, or replace the <code>DEFAULT_SITE_CONFIG</code> object in <code>js/site-config.js</code> with it, then deploy.</li>
+            </ol>
+            <div class="btn-row" style="margin-top:.8rem">
+              <button class="btn" id="export" type="button">Download config</button>
+              <button class="btn btn--ghost" id="copy" type="button">Copy JSON</button>
+              <label class="btn btn--ghost btn--sm" style="cursor:pointer">
+                Import config<input id="import-file" type="file" accept="application/json" hidden>
+              </label>
+              <button class="btn btn--danger btn--sm" id="reset" type="button">Reset to defaults</button>
+            </div>
+          </div>
+          <div class="card">
+            <h2>Where do products and orders live?</h2>
+            <p class="sub">This panel controls the storefront's content — hero slides, banners, featured picks and store details. Products, prices, stock and orders are managed in your existing Baznivo dashboard.</p>
+            <a class="btn btn--ghost" href="https://baznivo.vercel.app/admin" target="_blank" rel="noopener">Open products &amp; orders admin ↗</a>
+          </div>
+        </section>
+
+        <div class="sticky-actions">
+          <button class="btn" id="save" type="button">Save changes</button>
+          <button class="btn btn--ghost" id="discard" type="button">Discard</button>
+          <span id="dirty" class="slide-card__meta"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="js/site-config.js"></script>
+<script>
+(function () {
+  const KEY = 'baznivo-site-config';
+  const $ = (s, r = document) => r.querySelector(s);
+  const clone = (o) => JSON.parse(JSON.stringify(o));
+
+  let draft = clone(window.BAZNIVO_CONFIG || DEFAULT_SITE_CONFIG);
+  let dirty = false;
+  let products = [];
+
+  /* ---------------- gate ---------------- */
+  const gatePass = () => (window.BAZNIVO_CONFIG?.adminPasscode || DEFAULT_SITE_CONFIG.adminPasscode || 'baznivo');
+  const unlocked = () => sessionStorage.getItem('baznivo-admin') === '1';
+
+  $('#gate').hidden = unlocked();
+  $('#app').hidden = !unlocked();
+
+  $('#gate-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    if ($('#gate-pass').value === gatePass()) {
+      sessionStorage.setItem('baznivo-admin', '1');
+      $('#gate').hidden = true;
+      $('#app').hidden = false;
+      boot();
+    } else {
+      toast('Wrong passcode');
+      $('#gate-pass').value = '';
+    }
+  });
+
+  $('#lock').addEventListener('click', () => {
+    sessionStorage.removeItem('baznivo-admin');
+    location.reload();
+  });
+
+  /* ---------------- helpers ---------------- */
+  let toastTimer;
+  function toast(msg) {
+    const el = $('#toast');
+    el.textContent = msg;
+    el.classList.add('is-on');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('is-on'), 2200);
+  }
+  const markDirty = (v = true) => {
+    dirty = v;
+    $('#dirty').textContent = v ? 'Unsaved changes' : '';
+  };
+
+  /* ---------------- tabs ---------------- */
+  $('#tabs').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-tab]');
+    if (!b) return;
+    document.querySelectorAll('#tabs button').forEach((x) => x.classList.toggle('is-active', x === b));
+    document.querySelectorAll('.panel').forEach((p) => p.classList.toggle('is-active', p.dataset.panel === b.dataset.tab));
+  });
+
+  /* ---------------- hero slides ---------------- */
+  function renderSlides() {
+    const wrap = $('#slides');
+    const slides = draft.hero.slides || [];
+    wrap.innerHTML = slides
+      .map(
+        (s, i) => `
+      <div class="slide-card" data-i="${i}">
+        <div class="slide-card__head">
+          <img class="slide-card__thumb" src="${s.image || ''}" alt="">
+          <div>
+            <div class="slide-card__title">Slide ${i + 1}</div>
+            <div class="slide-card__meta">${(s.title || 'Untitled').slice(0, 60)}</div>
+          </div>
+          <div class="slide-card__actions">
+            <button class="icon-sq" data-move="-1" title="Move up">↑</button>
+            <button class="icon-sq" data-move="1" title="Move down">↓</button>
+            <button class="icon-sq" data-del="1" title="Delete">✕</button>
+          </div>
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label class="f">Image URL</label>
+            <input type="text" data-f="image" value="${escapeAttr(s.image)}" placeholder="assets/img/hero.jpg">
+          </div>
+          <div class="field">
+            <label class="f">Or upload an image</label>
+            <input type="file" accept="image/*" data-upload="1">
+            <div class="slide-card__meta">Uploads are stored in this browser only — for production, use a URL.</div>
+          </div>
+        </div>
+        <div class="row2">
+          <div class="field"><label class="f">Small label</label><input type="text" data-f="kicker" value="${escapeAttr(s.kicker)}"></div>
+          <div class="field"><label class="f">Headline</label><input type="text" data-f="title" value="${escapeAttr(s.title)}"></div>
+        </div>
+        <div class="field"><label class="f">Subheading</label><textarea rows="2" data-f="sub">${escapeHtml(s.sub)}</textarea></div>
+        <div class="row2">
+          <div class="field"><label class="f">Button label</label><input type="text" data-f="cta" value="${escapeAttr(s.cta)}"></div>
+          <div class="field"><label class="f">Button link</label><input type="text" data-f="href" value="${escapeAttr(s.href)}"></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label class="f">Second button (optional)</label><input type="text" data-f="cta2" value="${escapeAttr(s.cta2)}"></div>
+          <div class="field"><label class="f">Second button link</label><input type="text" data-f="href2" value="${escapeAttr(s.href2)}"></div>
+        </div>
+      </div>`
+      )
+      .join('');
+  }
+
+  function escapeAttr(v) {
+    return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+  }
+  function escapeHtml(v) {
+    return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+  }
+
+  $('#slides').addEventListener('input', (e) => {
+    const card = e.target.closest('.slide-card');
+    if (!card) return;
+    const i = Number(card.dataset.i);
+    const f = e.target.dataset.f;
+    if (!f) return;
+    draft.hero.slides[i][f] = e.target.value;
+    markDirty();
+    if (f === 'title') card.querySelector('.slide-card__meta').textContent = e.target.value.slice(0, 60);
+    if (f === 'image') card.querySelector('.slide-card__thumb').src = e.target.value;
+  });
+
+  $('#slides').addEventListener('change', (e) => {
+    const up = e.target.closest('[data-upload]');
+    if (!up || !up.files[0]) return;
+    const card = up.closest('.slide-card');
+    const i = Number(card.dataset.i);
+    const reader = new FileReader();
+    reader.onload = () => {
+      draft.hero.slides[i].image = reader.result;
+      card.querySelector('[data-f="image"]').value = '(uploaded image)';
+      card.querySelector('.slide-card__thumb').src = reader.result;
+      markDirty();
+      toast('Image added — remember to save');
+    };
+    reader.readAsDataURL(up.files[0]);
+  });
+
+  $('#slides').addEventListener('click', (e) => {
+    const card = e.target.closest('.slide-card');
+    if (!card) return;
+    const i = Number(card.dataset.i);
+    if (e.target.closest('[data-del]')) {
+      if (draft.hero.slides.length <= 1) return toast('Keep at least one slide');
+      draft.hero.slides.splice(i, 1);
+      renderSlides();
+      markDirty();
+      return;
+    }
+    const move = e.target.closest('[data-move]');
+    if (move) {
+      const dir = Number(move.dataset.move);
+      const j = i + dir;
+      if (j < 0 || j >= draft.hero.slides.length) return;
+      const arr = draft.hero.slides;
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+      renderSlides();
+      markDirty();
+    }
+  });
+
+  $('#hero-add').addEventListener('click', () => {
+    draft.hero.slides.push({ image: 'assets/img/p-lipstick.jpg', kicker: '', title: 'New slide', sub: '', cta: 'Shop now', href: 'shop.html' });
+    renderSlides();
+    markDirty();
+  });
+
+  /* ---------------- announcement + promo ---------------- */
+  function renderAnnounce() {
+    $('#announce').innerHTML = draft.announcement
+      .map((t, i) => `<div class="field"><label class="f">Line ${i + 1}</label><input type="text" data-ann="${i}" value="${escapeAttr(t)}"></div>`)
+      .join('');
+  }
+  $('#announce').addEventListener('input', (e) => {
+    const i = e.target.dataset.ann;
+    if (i === undefined) return;
+    draft.announcement[Number(i)] = e.target.value;
+    markDirty();
+  });
+
+  function fillPromo() {
+    $('#p-kicker').value = draft.promo.kicker || '';
+    $('#p-code').value = draft.promo.code || '';
+    $('#p-title').value = draft.promo.title || '';
+    $('#p-text').value = draft.promo.text || '';
+    $('#p-cta').value = draft.promo.cta || '';
+    $('#p-href').value = draft.promo.href || '';
+  }
+  [['#p-kicker', 'kicker'], ['#p-code', 'code'], ['#p-title', 'title'], ['#p-text', 'text'], ['#p-cta', 'cta'], ['#p-href', 'href']].forEach(([sel, key]) => {
+    $(sel).addEventListener('input', (e) => {
+      draft.promo[key] = e.target.value;
+      markDirty();
+    });
+  });
+
+  /* ---------------- store settings ---------------- */
+  function fillStore() {
+    const s = draft.store;
+    $('#s-name').value = s.name || '';
+    $('#s-tagline').value = s.tagline || '';
+    $('#s-wa').value = s.whatsapp || '';
+    $('#s-email').value = s.email || '';
+    $('#s-city').value = s.city || '';
+    $('#s-free').value = s.freeShipAt || 0;
+    $('#s-currency').value = s.currency || 'Rs';
+    $('#s-pass').value = draft.adminPasscode || '';
+  }
+  [['#s-name', 'name'], ['#s-tagline', 'tagline'], ['#s-wa', 'whatsapp'], ['#s-email', 'email'], ['#s-city', 'city'], ['#s-free', 'freeShipAt'], ['#s-currency', 'currency']].forEach(([sel, key]) => {
+    $(sel).addEventListener('input', (e) => {
+      draft.store[key] = key === 'freeShipAt' ? Number(e.target.value) : e.target.value;
+      markDirty();
+    });
+  });
+  $('#s-pass').addEventListener('input', (e) => {
+    draft.adminPasscode = e.target.value;
+    markDirty();
+  });
+
+  /* ---------------- featured products ---------------- */
+  async function loadProducts() {
+    try {
+      const r = await fetch('/api/products?limit=100', { headers: { Accept: 'application/json' } });
+      const d = await r.json();
+      products = (d.items || []).map((p) => ({
+        slug: p.slug,
+        name: p.name,
+        image: p.image ? '/media/' + String(p.image).replace(/^\/?assets\//, '') : '',
+        price: Math.round(Number(p.effective_price || p.price || 0) / 100),
+      }));
+    } catch {
+      products = [];
+    }
+    renderPicks();
+  }
+
+  function renderPicks() {
+    const q = ($('#feat-search').value || '').toLowerCase();
+    const chosen = draft.featured || [];
+    $('#feat-count').textContent = chosen.length ? chosen.length + ' selected' : 'Using API featured products';
+    const list = products.filter((p) => !q || p.name.toLowerCase().includes(q));
+    $('#pick-list').innerHTML = list.length
+      ? list
+          .map(
+            (p) => `
+        <label class="${chosen.includes(p.slug) ? 'is-on' : ''}">
+          <input type="checkbox" data-slug="${escapeAttr(p.slug)}" ${chosen.includes(p.slug) ? 'checked' : ''} style="width:auto">
+          ${p.image ? `<img src="${p.image}" alt="" loading="lazy">` : ''}
+          <span><strong>${escapeHtml(p.name)}</strong><span>Rs ${p.price.toLocaleString('en-US')}</span></span>
+        </label>`
+          )
+          .join('')
+      : '<p class="sub">Catalogue could not be loaded. Check the API connection.</p>';
+  }
+
+  $('#pick-list').addEventListener('change', (e) => {
+    const slug = e.target.dataset.slug;
+    if (!slug) return;
+    draft.featured = draft.featured || [];
+    if (e.target.checked) {
+      if (!draft.featured.includes(slug)) draft.featured.push(slug);
+    } else {
+      draft.featured = draft.featured.filter((s) => s !== slug);
+    }
+    e.target.closest('label').classList.toggle('is-on', e.target.checked);
+    $('#feat-count').textContent = draft.featured.length ? draft.featured.length + ' selected' : 'Using API featured products';
+    markDirty();
+  });
+  $('#feat-search').addEventListener('input', renderPicks);
+  $('#feat-clear').addEventListener('click', () => {
+    draft.featured = [];
+    renderPicks();
+    markDirty();
+  });
+
+  /* ---------------- save / export ---------------- */
+  function save() {
+    localStorage.setItem(KEY, JSON.stringify(draft));
+    window.BAZNIVO_CONFIG = draft;
+    markDirty(false);
+    toast('Saved to this browser');
+  }
+
+  $('#save').addEventListener('click', save);
+  $('#discard').addEventListener('click', () => {
+    draft = clone(window.BAZNIVO_CONFIG && localStorage.getItem(KEY) ? JSON.parse(localStorage.getItem(KEY)) : DEFAULT_SITE_CONFIG);
+    hydrate();
+    markDirty(false);
+    toast('Changes discarded');
+  });
+
+  $('#export').addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify(draft, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'site-config.json';
+    a.click();
+    toast('Config downloaded');
+  });
+
+  $('#copy').addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(JSON.stringify(draft, null, 2));
+      toast('JSON copied');
+    } catch {
+      toast('Copy failed — use download');
+    }
+  });
+
+  $('#import-file').addEventListener('change', (e) => {
+    const f = e.target.files[0];
+    if (!f) return;
+    const r = new FileReader();
+    r.onload = () => {
+      try {
+        draft = JSON.parse(r.result);
+        hydrate();
+        markDirty();
+        toast('Config imported — press Save');
+      } catch {
+        toast('That file is not valid JSON');
+      }
+    };
+    r.readAsText(f);
+  });
+
+  $('#reset').addEventListener('click', () => {
+    if (!confirm('Reset everything to the built-in defaults?')) return;
+    localStorage.removeItem(KEY);
+    draft = clone(DEFAULT_SITE_CONFIG);
+    hydrate();
+    markDirty();
+    toast('Reset to defaults');
+  });
+
+  /* ---------------- boot ---------------- */
+  function hydrate() {
+    $('#hero-interval').value = Math.max(1, (Number(draft.hero.interval) || 2000) / 1000);
+    renderSlides();
+    renderAnnounce();
+    fillPromo();
+    fillStore();
+    renderPicks();
+  }
+
+  $('#hero-interval').addEventListener('input', (e) => {
+    draft.hero.interval = Math.max(1000, Number(e.target.value) * 1000);
+    markDirty();
+  });
+
+  function boot() {
+    hydrate();
+    loadProducts();
+  }
+
+  if (unlocked()) boot();
+
+  window.addEventListener('beforeunload', (e) => {
+    if (dirty) {
+      e.preventDefault();
+      e.returnValue = '';
+    }
+  });
+})();
+</script>
+</body>
+</html>

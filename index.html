@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Baznivo — Everyday Essentials Online in Pakistan | Cash on Delivery</title>
-<meta name="description" content="Baznivo par fashion, beauty, electronics aur home essentials — curated picks, honest prices aur cash on delivery poore Pakistan mein.">
+<meta name="description" content="Shop fashion, beauty, tech and home essentials at Baznivo. Genuine products, transparent pricing and cash on delivery across Pakistan.">
 <meta name="theme-color" content="#33065c">
 <link rel="icon" href="assets/img/logo.png">
 <link rel="stylesheet" href="css/styles.css">
@@ -14,24 +14,15 @@
 <div id="site-header"></div>
 
 <!-- ================= HERO ================= -->
-<section class="hero" aria-label="Featured">
-  <div class="hero__slide is-live">
-    <div class="hero__media">
-      <img src="assets/img/hero.jpg" alt="Baznivo — everyday essentials, cash on delivery">
-    </div>
-    <div class="container hero__in">
-      <div class="hero__content">
-        <img class="hero__mark" src="assets/img/logo-white.png" alt="Baznivo">
-        <div class="hero__tagline">Your Beauty, Your Style</div>
-        <h1 class="hero__title">Jo chahiye, ghar tak.</h1>
-        <p class="hero__sub">Fashion, beauty, tech aur home essentials — original products, cash on delivery poore Pakistan mein.</p>
-        <div class="hero__actions">
-          <a class="btn btn--white" href="shop.html">Shop Now</a>
-          <a class="btn btn--onDark" href="shop.html?sort=discount">Offers dekhein</a>
-        </div>
-      </div>
-    </div>
-  </div>
+<section class="hero" id="hero" aria-label="Featured" aria-roledescription="carousel">
+  <div class="hero__viewport" id="hero-slides"></div>
+  <button class="hero__nav hero__nav--prev" id="hero-prev" aria-label="Previous slide">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+  </button>
+  <button class="hero__nav hero__nav--next" id="hero-next" aria-label="Next slide">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+  </button>
+  <div class="hero__dots" id="hero-dots" role="tablist" aria-label="Slides"></div>
 </section>
 
 <!-- ================= TRUST ================= -->
@@ -40,23 +31,23 @@
     <div class="trust__in">
       <div class="trust__item">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M1 3h13v13H1z"/><path d="M14 8h4l3 3v5h-7z"/><circle cx="5.5" cy="19" r="2"/><circle cx="17.5" cy="19" r="2"/></svg>
-        <div><strong>Free Delivery</strong><span>on Rs. 2,500+</span></div>
+        <div><strong>Free delivery</strong><span>over Rs 2,500</span></div>
       </div>
       <div class="trust__item">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/></svg>
-        <div><strong>Secure Payments</strong><span>100% safe</span></div>
+        <div><strong>100% original</strong><span>trusted suppliers</span></div>
       </div>
       <div class="trust__item">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14v-2a8 8 0 0 1 16 0v2"/><rect x="2" y="14" width="4" height="6" rx="1.5"/><rect x="18" y="14" width="4" height="6" rx="1.5"/><path d="M20 20a4 4 0 0 1-4 4h-3"/></svg>
-        <div><strong>24/7 Support</strong><span>WhatsApp par</span></div>
+        <div><strong>Real support</strong><span>on WhatsApp</span></div>
       </div>
       <div class="trust__item">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15.5-6.2L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15.5 6.2L3 16"/><path d="M3 21v-5h5"/></svg>
-        <div><strong>Easy Returns</strong><span>&amp; exchange</span></div>
+        <div><strong>7-day returns</strong><span>simple exchange</span></div>
       </div>
       <div class="trust__item">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3 6.6 7 .8-5.2 4.8 1.4 7L12 17.7 5.8 21.2l1.4-7L2 9.4l7-.8Z"/></svg>
-        <div><strong>Trusted by</strong><span>Thousands</span></div>
+        <div><strong>Trusted by</strong><span>thousands</span></div>
       </div>
     </div>
   </div>
@@ -66,8 +57,9 @@
 <section class="section" aria-labelledby="cats-h">
   <div class="container">
     <div class="section-head">
-      <h2 class="section-head__title" id="cats-h">Shop by Category</h2>
-      <p class="section-head__sub">Category chunein — sab kuch organized, ek hi jagah.</p>
+      <span class="section-head__kicker">Browse</span>
+      <h2 class="section-head__title" id="cats-h">Shop by category</h2>
+      <p class="section-head__sub">Everything organised, so you find it in seconds.</p>
     </div>
     <div class="cat-grid" id="cat-grid"></div>
   </div>
@@ -77,11 +69,12 @@
 <section class="section section--lilac" aria-labelledby="best-h">
   <div class="container">
     <div class="section-head">
-      <h2 class="section-head__title" id="best-h">Best Sellers</h2>
-      <p class="section-head__sub">Sab se zyada pasand kiye jane wale products.</p>
+      <span class="section-head__kicker">Customer favourites</span>
+      <h2 class="section-head__title" id="best-h">Best sellers</h2>
+      <p class="section-head__sub">The products our customers keep coming back for.</p>
     </div>
     <div class="grid-products" id="home-featured"></div>
-    <div style="text-align:center;margin-top:2rem">
+    <div class="section-foot">
       <a class="btn btn--ghost" href="shop.html">View all products</a>
     </div>
   </div>
@@ -90,14 +83,14 @@
 <!-- ================= PROMO ================= -->
 <section class="section section--tight">
   <div class="container">
-    <div class="promo" style="background-image:url('assets/img/promo-banner.jpg')">
+    <div class="promo" id="promo">
       <div class="promo__in">
-        <span class="promo__kicker">Launch offer</span>
-        <h2>Pehle order par 10% off</h2>
-        <p>Coupon code <strong>CASTMATICS10</strong> use karein — minimum order Rs. 1,500. Cash on delivery poore Pakistan mein.</p>
+        <span class="promo__kicker">Welcome offer</span>
+        <h2>10% off your first order</h2>
+        <p>Use code <strong>CASTMATICS10</strong> at checkout. Minimum order Rs 1,500. Cash on delivery available nationwide.</p>
         <div class="promo__actions">
           <a class="btn btn--white" href="shop.html">Shop the edit</a>
-          <a class="btn" href="contact.html" style="background:rgba(255,255,255,.15);box-shadow:none;border:1.5px solid rgba(255,255,255,.45)">Pooch lein</a>
+          <a class="btn btn--onDark" href="contact.html">Ask a question</a>
         </div>
       </div>
     </div>
@@ -108,14 +101,15 @@
 <section class="section" aria-labelledby="new-h">
   <div class="container">
     <div class="section-head">
-      <h2 class="section-head__title" id="new-h">New Arrivals</h2>
-      <p class="section-head__sub">Fresh stock — pehle aap ke liye.</p>
+      <span class="section-head__kicker">Just landed</span>
+      <h2 class="section-head__title" id="new-h">New arrivals</h2>
+      <p class="section-head__sub">Fresh stock, added every week.</p>
     </div>
     <div class="grid-products" id="home-new"></div>
   </div>
 </section>
 
-<!-- ================= FEATURES ================= -->
+<!-- ================= VALUE PROPS ================= -->
 <section class="section section--tight">
   <div class="container">
     <div class="feature-grid">
@@ -123,29 +117,29 @@
         <div class="feature__icon">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7 9 18l-5-5"/></svg>
         </div>
-        <h3>100% Original</h3>
-        <p>Sirf authentic products — koi copy nahi.</p>
+        <h3>Genuine products</h3>
+        <p>Every item is checked before it ships. No look-alikes, ever.</p>
       </div>
       <div class="feature reveal">
         <div class="feature__icon">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M1 3h13v13H1z"/><path d="M14 8h4l3 3v5h-7z"/><circle cx="5.5" cy="19" r="2"/><circle cx="17.5" cy="19" r="2"/></svg>
         </div>
-        <h3>2–4 Din Delivery</h3>
-        <p>Poore Pakistan mein tracked delivery.</p>
+        <h3>2–4 day delivery</h3>
+        <p>Tracked delivery to every city in Pakistan.</p>
       </div>
       <div class="feature reveal">
         <div class="feature__icon">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
         </div>
-        <h3>Cash on Delivery</h3>
-        <p>Parcel haath mein le kar payment karein.</p>
+        <h3>Cash on delivery</h3>
+        <p>Pay when the parcel reaches your door.</p>
       </div>
       <div class="feature reveal">
         <div class="feature__icon">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-4.4-7-10a7 7 0 1 1 14 0c0 5.6-7 10-7 10Z"/><circle cx="12" cy="11" r="2.4"/></svg>
         </div>
-        <h3>7-Din Returns</h3>
-        <p>Pasand na aaye to aasaani se exchange.</p>
+        <h3>7-day returns</h3>
+        <p>Not the right fit? Send it back, no drama.</p>
       </div>
     </div>
   </div>
@@ -155,8 +149,9 @@
 <section class="section section--lilac" id="sec-reviews" aria-labelledby="rev-h">
   <div class="container">
     <div class="section-head">
-      <h2 class="section-head__title" id="rev-h">Customers ki zubani</h2>
-      <p class="section-head__sub">Real orders, real feedback.</p>
+      <span class="section-head__kicker">In their words</span>
+      <h2 class="section-head__title" id="rev-h">What customers say</h2>
+      <p class="section-head__sub">Feedback from verified orders.</p>
     </div>
     <div class="review-grid" id="home-reviews"></div>
   </div>
@@ -166,8 +161,9 @@
 <section class="section" id="sec-journal" aria-labelledby="j-h">
   <div class="container">
     <div class="section-head">
-      <h2 class="section-head__title" id="j-h">Baznivo Journal</h2>
-      <p class="section-head__sub">Stories, tips aur buying guides.</p>
+      <span class="section-head__kicker">The Baznivo journal</span>
+      <h2 class="section-head__title" id="j-h">Guides &amp; stories</h2>
+      <p class="section-head__sub">Practical advice on buying better and using what you own.</p>
     </div>
     <div class="grid-products cols-3" id="home-journal"></div>
   </div>
@@ -177,10 +173,10 @@
 <section class="section section--tight">
   <div class="container">
     <div class="newsletter">
-      <h2>Naye products sab se pehle</h2>
-      <p>Offers, nayi arrivals aur buying guides — sirf achi cheezein, spam nahi.</p>
+      <h2>New drops, first</h2>
+      <p>Offers, new arrivals and buying guides. No spam, ever.</p>
       <form data-newsletter>
-        <input type="email" required placeholder="Aap ka email address" aria-label="Email address">
+        <input type="email" required placeholder="Your email address" aria-label="Email address">
         <button class="btn" type="submit">Subscribe</button>
       </form>
     </div>
@@ -188,6 +184,7 @@
 </section>
 
 <div id="site-footer"></div>
+<script src="js/site-config.js"></script>
 <script src="js/data.js"></script>
 <script src="js/api.js"></script>
 <script src="js/app.js"></script>
