@@ -1,0 +1,12 @@
+{
+  "name": "baznivo-storefront",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Baznivo — makeup & beauty storefront (static, WhatsApp checkout).",
+  "scripts": {
+    "dev": "npx --yes serve . -l 3000",
+    "start": "npx --yes serve . -l 3000"
+  },
+  "keywords": ["ecommerce", "makeup", "beauty", "pakistan", "static-site"],
+  "license": "UNLICENSED"
+}

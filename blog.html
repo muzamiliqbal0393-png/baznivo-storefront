@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en-PK">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Beauty Journal | Baznivo</title>
+<meta name="description" content="Makeup tips, product guides aur skincare basics — Baznivo beauty journal.">
+<meta name="theme-color" content="#33065c">
+<link rel="icon" href="assets/img/logo.png">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body data-page="blog">
+
+<div id="site-header"></div>
+
+<div class="page-head">
+  <div class="container">
+    <h1>Beauty Journal</h1>
+    <div class="crumbs"><a href="index.html">Home</a> / <span>Blog</span></div>
+  </div>
+</div>
+
+<section class="section">
+  <div class="container">
+    <div class="grid-products" id="blog-grid" style="grid-template-columns:repeat(3,1fr)"></div>
+  </div>
+</section>
+
+<section class="section section--lilac">
+  <div class="container prose" style="max-width:820px">
+    <h2>Beginners ke liye 5 makeup essentials</h2>
+    <p>
+      Bohat saare products ki zaroorat nahi. Ek clean, roz ke look ke liye ye 5 cheezein kaafi hain:
+    </p>
+    <ul>
+      <li><strong>Foundation ya BB cream</strong> — base jo skin tone se match kare.</li>
+      <li><strong>Concealer</strong> — dark circles aur chhote blemishes ke liye.</li>
+      <li><strong>Kajal / eyeliner</strong> — aankhon ko define karne ke liye.</li>
+      <li><strong>Lipstick</strong> — ek shade jo aap ke din ke look se match kare.</li>
+      <li><strong>Compact powder</strong> — din bhar shine control ke liye.</li>
+    </ul>
+    <p>Bas itna. Baqi sab baad mein — jab aap ko khud pata chal jaye ke aap ka look kya hai.</p>
+
+    <h2>Long-wear lipstick: 6 ghante kaise chalayein</h2>
+    <ul>
+      <li>Honton ko pehle scrub aur moisturise karein — lipstick smooth baithti hai.</li>
+      <li>Lip liner se poore hont bharein, phir lipstick lagayein.</li>
+      <li>Ek tissue se daba kar halka powder lagayein, phir dobara ek layer.</li>
+      <li>Khane se pehle sirf centre saaf karein, poora nahi.</li>
+    </ul>
+
+    <h2>Brush care 101</h2>
+    <p>
+      Gande brushes na sirf product waste karte hain, balke skin par breakouts bhi la sakte hain.
+      Har hafte halke shampoo se dho lein, bristles ko neeche rakh kar dry karein aur shape hold karein.
+    </p>
+  </div>
+</section>
+
+<div id="site-footer"></div>
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const grid = document.getElementById('blog-grid');
+    grid.innerHTML = JOURNAL.map(j => `
+      <article class="p-card reveal">
+        <a class="p-card__media" href="blog.html"><img src="${j.image}" alt="${j.title}" loading="lazy"></a>
+        <div class="p-card__body">
+          <span class="p-card__cat">${j.date}</span>
+          <h3 class="p-card__name">${j.title}</h3>
+          <p style="font-size:.85rem;color:var(--muted);margin:0">${j.excerpt}</p>
+          <a class="link-more" href="blog.html">Read story →</a>
+        </div>
+      </article>`).join('');
+    window.watchReveals && window.watchReveals();
+  });
+</script>
+</body>
+</html>

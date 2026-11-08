@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en-PK">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shop Makeup &amp; Beauty Products | Baznivo</title>
+<meta name="description" content="Baznivo ka poora makeup catalog — lipsticks, foundations, palettes, brushes, skincare aur beauty accessories. Cash on delivery poore Pakistan mein.">
+<meta name="theme-color" content="#33065c">
+<link rel="icon" href="assets/img/logo.png">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body data-page="shop">
+
+<div id="site-header"></div>
+
+<div class="page-head">
+  <div class="container">
+    <h1>Shop all makeup</h1>
+    <div class="crumbs"><a href="index.html">Home</a> / <span>Shop</span></div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="shop">
+    <aside class="filters" aria-label="Filters">
+      <h3>Category</h3>
+      <div id="filter-cats"></div>
+
+      <div class="filters__group">
+        <h3>Price</h3>
+        <input class="range" id="filter-price" type="range" min="500" max="4000" step="100" value="4000" aria-label="Maximum price">
+        <div style="display:flex;justify-content:space-between;font-size:.8rem;color:var(--muted);margin-top:.4rem">
+          <span>Rs 500</span><strong id="price-label" style="color:var(--pink-strong)">Rs 4,000</strong>
+        </div>
+      </div>
+
+      <div class="filters__group">
+        <h3>Madad chahiye?</h3>
+        <p style="font-size:.85rem;color:var(--muted)">Shade ya skin type ke hisaab se choose karne mein help chahiye? WhatsApp par pooch lein.</p>
+        <a class="btn btn--ghost btn--sm" href="contact.html">Contact karein</a>
+      </div>
+    </aside>
+
+    <div>
+      <div class="shop__bar">
+        <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap">
+          <span class="shop__count" id="shop-count">13 products</span>
+          <span id="active-filters" style="display:flex;gap:.35rem;flex-wrap:wrap"></span>
+        </div>
+        <label style="display:flex;align-items:center;gap:.5rem;font-size:.85rem;color:var(--muted)">
+          Sort
+          <select class="select" id="sort">
+            <option value="popular">Best selling</option>
+            <option value="new">Newest</option>
+            <option value="low">Price: low to high</option>
+            <option value="high">Price: high to low</option>
+            <option value="discount">Biggest discount</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="grid-products" id="shop-grid" style="grid-template-columns:repeat(3,1fr)"></div>
+    </div>
+  </div>
+</div>
+
+<div id="site-footer"></div>
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

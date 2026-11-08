@@ -1,0 +1,12 @@
+{
+  "name": "Baznivo — Makeup & Beauty Store",
+  "short_name": "Baznivo",
+  "description": "Original makeup, skincare aur beauty essentials — cash on delivery poore Pakistan mein.",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#33065c",
+  "icons": [
+    { "src": "assets/img/logo.png", "sizes": "258x74", "type": "image/png" }
+  ]
+}
