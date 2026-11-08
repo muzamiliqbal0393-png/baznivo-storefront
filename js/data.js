@@ -4,7 +4,7 @@
    Prices PKR.
    ========================================================================== */
 
-const STORE = {
+let STORE = {
   name: 'Baznivo',
   tagline: 'Your Beauty, Your Style',
   whatsapp: '923154120584',
@@ -14,7 +14,7 @@ const STORE = {
   city: 'Lahore, Pakistan',
 };
 
-const CATEGORIES = [
+let CATEGORIES = [
   {
     slug: 'brushes',
     name: 'Makeup Brushes',
@@ -53,7 +53,7 @@ const CATEGORIES = [
   },
 ];
 
-const PRODUCTS = [
+let PRODUCTS = [
   {
     id: 1,
     slug: 'velvet-matte-lipstick',

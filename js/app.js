@@ -389,7 +389,13 @@ function productCard(p) {
 }
 
 /* ----------------------------- page boot ----------------------------- */
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  // real API data (agar available ho) load hone ka intezaar
+  try {
+    if (window.BAZNIVO_API_READY) await window.BAZNIVO_API_READY;
+  } catch {}
+  const SRC = window.BAZNIVO_SOURCE === 'api' ? 'API' : 'mock';
+  console.info('[Baznivo] catalog source:', SRC, '| products:', PRODUCTS.length);
   const page = document.body.dataset.page || 'home';
 
   const headerMount = $('#site-header');
