@@ -645,14 +645,24 @@ p:last-child { margin-bottom: 0; }
 
 .hero__media { position: absolute; inset: 0; z-index: 0; overflow: hidden; background: #2b0546; }
 .hero__media img, .hero__video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.hero__video { filter: saturate(1.08) brightness(1.06) contrast(1.03); }
 .hero__media::after {
   content: ""; position: absolute; inset: 0;
   background:
-    radial-gradient(120% 85% at 50% -10%, rgba(51, 6, 92, .25), rgba(18, 2, 36, .75) 75%),
-    linear-gradient(180deg, rgba(18, 2, 36, .55) 0%, rgba(18, 2, 36, .30) 42%, rgba(18, 2, 36, .70) 100%);
+    radial-gradient(120% 85% at 50% -10%, rgba(51, 6, 92, .10), rgba(18, 2, 36, .46) 80%),
+    linear-gradient(200deg, rgba(51, 6, 92, .22), rgba(192, 38, 211, .10)),
+    linear-gradient(180deg, rgba(18, 2, 36, .34) 0%, rgba(18, 2, 36, .10) 42%, rgba(18, 2, 36, .50) 100%);
 }
 .hero__in { position: relative; z-index: 1; }
-.hero__content { max-width: 760px; margin-inline: auto; text-align: center; color: #fff; padding-block: clamp(2.2rem, 5vw, 3.6rem) clamp(4rem, 6vw, 5.2rem); }
+.hero__content {
+  position: relative; max-width: 760px; margin-inline: auto; text-align: center; color: #fff;
+  padding-block: clamp(2.2rem, 5vw, 3.6rem) clamp(4rem, 6vw, 5.2rem);
+}
+/* soft scrim behind the copy only — keeps video footage visible at the edges */
+.hero__content::before {
+  content: ""; position: absolute; inset: -8% -14%; z-index: -1; pointer-events: none;
+  background: radial-gradient(58% 62% at 50% 46%, rgba(18, 2, 36, .62) 0%, rgba(18, 2, 36, .30) 55%, rgba(18, 2, 36, 0) 78%);
+}
 .hero__mark { height: clamp(52px, 6.5vw, 78px); margin: 0 auto 1rem; filter: drop-shadow(0 8px 22px rgba(0, 0, 0, .45)); }
 .hero__tagline {
   font-size: clamp(.72rem, 1.1vw, .92rem); font-weight: 700; letter-spacing: .22em;
