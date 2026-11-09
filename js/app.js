@@ -392,7 +392,7 @@ function initHero() {
   const mount = $('#hero-slides');
   if (!mount) return;
   const cfg = window.BAZNIVO_CONFIG?.hero || {};
-  const slides = (cfg.slides || []).filter((sl) => sl && sl.image);
+  const slides = (cfg.slides || []).filter((sl) => sl && (sl.image || sl.video));
   if (!slides.length) return;
 
   mount.innerHTML = slides
@@ -400,7 +400,13 @@ function initHero() {
       (sl, i) => `
     <div class="hero__slide${sl.layout === 'split' ? ' hero__slide--split' : ''}${i === 0 ? ' is-live' : ''}" role="group" aria-roledescription="slide" aria-label="Slide ${i + 1} of ${slides.length}">
       <div class="hero__media">
-        <img src="${sl.image}" alt="${(sl.title || 'Baznivo').replace(/"/g, '')}"${i ? ' loading="lazy"' : ''} style="object-position:${sl.focus || 'center'}">
+        ${
+          sl.video
+            ? `<video class="hero__video" muted loop playsinline preload="${i === 0 ? 'auto' : 'none'}" poster="${sl.poster || ''}" aria-hidden="true">
+                 <source src="${sl.video}" type="video/mp4">
+               </video>`
+            : `<img src="${sl.image}" alt="${(sl.title || 'Baznivo').replace(/"/g, '')}"${i ? ' loading="lazy"' : ''} style="object-position:${sl.focus || 'center'}">`
+        }
       </div>
       <div class="container hero__in">
         <div class="hero__content">
@@ -431,9 +437,21 @@ function initHero() {
   const interval = Math.max(1200, Number(cfg.interval) || 2000);
   const show = (i) => {
     idx = (i + els.length) % els.length;
-    els.forEach((el, n) => el.classList.toggle('is-live', n === idx));
+    els.forEach((el, n) => {
+      const live = n === idx;
+      el.classList.toggle('is-live', live);
+      const v = el.querySelector('video');
+      if (!v) return;
+      if (live) {
+        v.play?.().catch(() => {});
+      } else {
+        v.pause?.();
+        try { v.currentTime = 0; } catch {}
+      }
+    });
     $$('.hero__dot', dotsWrap || document).forEach((d, n) => d.classList.toggle('is-live', n === idx));
   };
+  show(0);
   const start = () => {
     if (els.length < 2 || reduceMotion) return;
     stop();

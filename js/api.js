@@ -24,6 +24,11 @@ async function apiGet(path, ms = API_TIMEOUT) {
 
 /* Store ki images cross-origin block karti hain (CORP: same-origin),
    is liye unhe /media/ proxy (vercel.json rewrite) ke through same-origin serve karte hain. */
+const CFG_BEAUTY_ONLY = () => {
+  const c = window.BAZNIVO_CONFIG || {};
+  return c.beautyOnly !== false;
+};
+
 const absImg = (p) => {
   if (!p) return '';
   let path = p;
@@ -169,6 +174,11 @@ function mapPost(p) {
 }
 
 /* ---------------- boot ---------------- */
+/* Bundled (makeup-only) catalogue — API mein makeup products na hone par yeh use hota hai */
+const BUNDLED_PRODUCTS = PRODUCTS.slice();
+const BUNDLED_CATEGORIES = CATEGORIES.slice();
+const BUNDLED_JOURNAL = typeof JOURNAL !== 'undefined' ? JOURNAL.slice() : [];
+
 window.BAZNIVO_API_READY = (async () => {
   if (new URLSearchParams(location.search).has('mock')) {
     window.BAZNIVO_SOURCE = 'mock';
@@ -186,6 +196,8 @@ window.BAZNIVO_API_READY = (async () => {
     const published = (prodRes.items || []).filter((p) => Number(p.published) !== 0).map(mapProduct);
     const withStock = published.filter((p) => p.stock > 0);
     const liveProducts = withStock.length >= 4 ? withStock : published; // sold-out items home/shop par hide
+
+    const beautyOnly = CFG_BEAUTY_ONLY();
 
     if (liveProducts.length) {
       const rawCats = new URLSearchParams(location.search).has('rawcats');
@@ -214,6 +226,26 @@ window.BAZNIVO_API_READY = (async () => {
       const featured = pool.filter((p) => p.featured);
       window.BAZNIVO_FEATURED = (featured.length >= 4 ? featured : pool).slice(0, 8);
       window.BAZNIVO_NEW = pool.slice().sort((a, b) => b.sortId - a.sortId).slice(0, 4);
+
+      /* ---- makeup-only mode ---- */
+      if (beautyOnly) {
+        const beauty = liveProducts.filter((p) => p.category === 'beauty');
+        if (beauty.length >= 6) {
+          // API mein kaafi makeup products hain -> unhi ko dikhao
+          PRODUCTS = beauty;
+          CATEGORIES = buildCategories(beauty);
+          window.BAZNIVO_FEATURED = (beauty.filter((p) => p.featured).length ? beauty.filter((p) => p.featured) : beauty).slice(0, 8);
+          window.BAZNIVO_NEW = beauty.slice().sort((a, b) => b.sortId - a.sortId).slice(0, 4);
+          window.BAZNIVO_SOURCE = 'api-beauty';
+        } else {
+          // API mein makeup nahi -> bundled makeup catalogue
+          PRODUCTS = BUNDLED_PRODUCTS;
+          CATEGORIES = BUNDLED_CATEGORIES;
+          window.BAZNIVO_FEATURED = BUNDLED_PRODUCTS.slice(0, 8);
+          window.BAZNIVO_NEW = BUNDLED_PRODUCTS.slice(-4).reverse();
+          window.BAZNIVO_SOURCE = 'bundled-beauty';
+        }
+      }
       window.BAZNIVO_SOURCE = 'api';
     }
 
@@ -225,7 +257,7 @@ window.BAZNIVO_API_READY = (async () => {
     if (st.announcement) STORE.announcement = st.announcement;
     STORE.googleLogin = !!st.google_login;
 
-    window.BAZNIVO_POSTS = (blogRes.items || []).map(mapPost);
+    window.BAZNIVO_POSTS = beautyOnly ? BUNDLED_JOURNAL : (blogRes.items || []).map(mapPost);
     window.BAZNIVO_REVIEWS = (revRes.items || [])
       .filter((r) => (r.body || r.text || '').trim() && Number(r.rating) >= 4)
       .map((r) => ({

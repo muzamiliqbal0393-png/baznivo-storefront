@@ -127,6 +127,14 @@
             </div>
           </div>
           <div class="card">
+            <h2>Catalogue</h2>
+            <p class="sub">Control which products the storefront shows.</p>
+            <label class="pick" style="display:flex;gap:.6rem;align-items:center;padding:.7rem .9rem;max-width:420px">
+              <input type="checkbox" id="s-beauty" style="width:auto">
+              <span><strong>Beauty / makeup only</strong><span>Fashion, electronics, home etc. hidden</span></span>
+            </label>
+          </div>
+          <div class="card">
             <h2>Admin passcode</h2>
             <p class="sub">This is a client-side gate, not a login. Anyone with the link can view this page — do not store sensitive data here.</p>
             <div class="field" style="max-width:320px"><label class="f" for="s-pass">Passcode</label><input id="s-pass" type="text"></div>
@@ -237,7 +245,7 @@
         (s, i) => `
       <div class="slide-card" data-i="${i}">
         <div class="slide-card__head">
-          <img class="slide-card__thumb" src="${s.image || ''}" alt="">
+          <img class="slide-card__thumb" src="${s.poster || s.image || ''}" alt="">
           <div>
             <div class="slide-card__title">Slide ${i + 1}</div>
             <div class="slide-card__meta">${(s.title || 'Untitled').slice(0, 60)}</div>
@@ -250,13 +258,24 @@
         </div>
         <div class="row2">
           <div class="field">
-            <label class="f">Image URL</label>
+            <label class="f">Image URL (fallback / poster)</label>
             <input type="text" data-f="image" value="${escapeAttr(s.image)}" placeholder="assets/img/hero.jpg">
           </div>
           <div class="field">
             <label class="f">Or upload an image</label>
             <input type="file" accept="image/*" data-upload="1">
             <div class="slide-card__meta">Uploads are stored in this browser only — for production, use a URL.</div>
+          </div>
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label class="f">Background video (MP4)</label>
+            <input type="text" data-f="video" value="${escapeAttr(s.video)}" placeholder="assets/video/hero-1.mp4">
+            <div class="slide-card__meta">Video ho to image ki jagah video chalta hai (muted, loop).</div>
+          </div>
+          <div class="field">
+            <label class="f">Video poster image</label>
+            <input type="text" data-f="poster" value="${escapeAttr(s.poster)}" placeholder="assets/img/hero-poster/hero-1.jpg">
           </div>
         </div>
         <div class="row2">
@@ -379,6 +398,7 @@
     $('#s-city').value = s.city || '';
     $('#s-free').value = s.freeShipAt || 0;
     $('#s-currency').value = s.currency || 'Rs';
+    $('#s-beauty').checked = draft.beautyOnly !== false;
     $('#s-pass').value = draft.adminPasscode || '';
   }
   [['#s-name', 'name'], ['#s-tagline', 'tagline'], ['#s-wa', 'whatsapp'], ['#s-email', 'email'], ['#s-city', 'city'], ['#s-free', 'freeShipAt'], ['#s-currency', 'currency']].forEach(([sel, key]) => {
@@ -386,6 +406,10 @@
       draft.store[key] = key === 'freeShipAt' ? Number(e.target.value) : e.target.value;
       markDirty();
     });
+  });
+  $('#s-beauty').addEventListener('change', (e) => {
+    draft.beautyOnly = e.target.checked;
+    markDirty();
   });
   $('#s-pass').addEventListener('input', (e) => {
     draft.adminPasscode = e.target.value;
