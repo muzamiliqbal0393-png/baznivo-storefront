@@ -246,7 +246,7 @@ window.BAZNIVO_API_READY = (async () => {
           window.BAZNIVO_SOURCE = 'bundled-beauty';
         }
       }
-      window.BAZNIVO_SOURCE = 'api';
+      if (!beautyOnly) window.BAZNIVO_SOURCE = 'api';
     }
 
     const st = setRes.settings || {};
