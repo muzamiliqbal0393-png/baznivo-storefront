@@ -813,7 +813,7 @@ function initProduct() {
   /* SEO: real title, canonical and Product structured data per product */
   document.title = /Baznivo/i.test(p.name) ? `${p.name} | Official Store` : `${p.name} — ${money(p.price)} | Baznivo`;
   const canon = document.querySelector('link[rel="canonical"]');
-  if (canon) canon.href = `${location.origin}/product.html?slug=${p.slug}`;
+  if (canon) canon.href = `${location.origin}/product?slug=${p.slug}`;
   const metaDesc = document.querySelector('meta[name="description"]');
   if (metaDesc) metaDesc.setAttribute('content', (p.desc || p.blurb || '').slice(0, 158));
   const ogT = document.querySelector('meta[property="og:title"]');
@@ -834,7 +834,7 @@ function initProduct() {
       priceCurrency: 'PKR',
       price: p.price,
       availability: p.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
-      url: `${location.origin}/product.html?slug=${p.slug}`,
+      url: `${location.origin}/product?slug=${p.slug}`,
     },
   });
   document.head.appendChild(ld);
