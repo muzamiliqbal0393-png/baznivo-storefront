@@ -3,8 +3,24 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Journal | Baznivo</title>
-<meta name="description" content="Baznivo Journal — styling tips, product guides aur buying advice.">
+<title>Beauty Journal — Tips &amp; Guides | Baznivo</title>
+<meta name="description" content="Makeup tips, routines and buying guides from Baznivo — simple advice for everyday looks.">
+<!-- social -->
+<link rel="canonical" href="https://baznivo-storefront.vercel.app/blog.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Baznivo">
+<meta property="og:title" content="Beauty Journal — Tips & Guides | Baznivo">
+<meta property="og:description" content="Makeup tips, routines and buying guides from Baznivo — simple advice for everyday looks.">
+<meta property="og:url" content="https://baznivo-storefront.vercel.app/blog.html">
+<meta property="og:image" content="https://baznivo-storefront.vercel.app/assets/img/hero-poster/hero-1.jpg">
+<meta property="og:image:width" content="1280">
+<meta property="og:image:height" content="720">
+<meta property="og:locale" content="en_PK">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Beauty Journal — Tips & Guides | Baznivo">
+<meta name="twitter:description" content="Makeup tips, routines and buying guides from Baznivo — simple advice for everyday looks.">
+<meta name="twitter:image" content="https://baznivo-storefront.vercel.app/assets/img/hero-poster/hero-1.jpg">
+<!-- /social -->
 <meta name="theme-color" content="#33065c">
 <link rel="icon" href="assets/img/logo.png">
 <link rel="stylesheet" href="css/styles.css">
@@ -85,7 +101,7 @@
       ? window.BAZNIVO_POSTS
       : JOURNAL.map((j) => ({ ...j, slug: j.slug || 'story' }));
     grid.innerHTML = posts.map(asCard).join('') ||
-      '<div class="empty" style="grid-column:1/-1"><p><strong>Abhi koi story publish nahi hui.</strong></p></div>';
+      '<div class="empty" style="grid-column:1/-1"><p><strong>No stories published yet.</strong></p></div>';
     window.watchReveals && window.watchReveals();
   });
 </script>

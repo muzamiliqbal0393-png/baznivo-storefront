@@ -66,7 +66,7 @@ const Cart = {
     else this.items.push({ slug, qty });
     this.save();
     openCart();
-    toast('Cart mein add ho gaya');
+    toast('Added to cart');
   },
   setQty(slug, qty) {
     const line = this.items.find((i) => i.slug === slug);
@@ -96,6 +96,21 @@ const Cart = {
   },
 };
 
+/* cart lines whose product no longer exists in the catalogue are dropped,
+   so the summary totals and checkout never see an undefined product */
+Cart.prune = function () {
+  const before = this.items.length;
+  this.items = this.items.filter((i) => bySlug(i.slug));
+  if (this.items.length !== before) this.save();
+  return this.items;
+};
+Cart.lines = function () {
+  return this.items.filter((i) => bySlug(i.slug));
+};
+Cart.count = function () {
+  return this.lines().reduce((n, i) => n + i.qty, 0);
+};
+
 const Wishlist = {
   items: readStore('baznivo-wish', []),
   has(slug) {
@@ -106,7 +121,7 @@ const Wishlist = {
     else this.items.push(slug);
     writeStore('baznivo-wish', this.items);
     renderWishCount();
-    toast(this.has(slug) ? 'Wishlist mein add ho gaya' : 'Wishlist se nikal diya');
+    toast(this.has(slug) ? 'Saved to wishlist' : 'Removed from wishlist');
   },
 };
 
@@ -227,7 +242,7 @@ function footerHTML() {
     <div class="container footer__top">
       <div class="footer__brand">
         <img src="assets/img/logo.png" alt="Baznivo">
-        <p>Baznivo is a Pakistan-based online store for everyday essentials — fashion, beauty, tech and home. Genuine products, transparent pricing and cash on delivery nationwide.</p>
+        <p>Baznivo is a Pakistan-based makeup and beauty store — lipsticks, palettes, foundation, brushes and skincare. Genuine products, honest pricing and cash on delivery nationwide.</p>
         <div class="footer__contact">
           <span>${I.pin} ${STORE.city}</span>
           <span>${I.mail} ${STORE.email}</span>
@@ -533,6 +548,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (footerMount) footerMount.innerHTML = footerHTML();
   document.body.insertAdjacentHTML('beforeend', cartDrawerHTML());
 
+  Cart.prune(); /* drop lines for products that no longer exist */
   renderCartCount();
   renderWishCount();
   renderCart();
@@ -794,6 +810,35 @@ function initProduct() {
 
   $('#pd-crumb').innerHTML = `<a href="index.html">Home</a> / <a href="shop.html">Shop</a> / <a href="shop.html?category=${p.category}">${catName(p.category)}</a> / <span>${p.name}</span>`;
 
+  /* SEO: real title, canonical and Product structured data per product */
+  document.title = /Baznivo/i.test(p.name) ? `${p.name} | Official Store` : `${p.name} — ${money(p.price)} | Baznivo`;
+  const canon = document.querySelector('link[rel="canonical"]');
+  if (canon) canon.href = `${location.origin}/product.html?slug=${p.slug}`;
+  const metaDesc = document.querySelector('meta[name="description"]');
+  if (metaDesc) metaDesc.setAttribute('content', (p.desc || p.blurb || '').slice(0, 158));
+  const ogT = document.querySelector('meta[property="og:title"]');
+  if (ogT) ogT.setAttribute('content', `${p.name} — Baznivo`);
+  const ogI = document.querySelector('meta[property="og:image"]');
+  if (ogI) ogI.setAttribute('content', location.origin + '/' + String(p.image).replace(/^\.?\//, ''));
+  const ld = document.createElement('script');
+  ld.type = 'application/ld+json';
+  ld.textContent = JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: p.name,
+    image: location.origin + '/' + String(p.image).replace(/^\.?\//, ''),
+    description: p.desc || p.blurb,
+    brand: { '@type': 'Brand', name: p.brand || 'Baznivo' },
+    offers: {
+      '@type': 'Offer',
+      priceCurrency: 'PKR',
+      price: p.price,
+      availability: p.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+      url: `${location.origin}/product.html?slug=${p.slug}`,
+    },
+  });
+  document.head.appendChild(ld);
+
   let active = p.image;
   const paint = () => {
     $('#pd-gallery').innerHTML = `
@@ -901,7 +946,7 @@ function initContact() {
     const data = new FormData(form);
     const msg = `Hello Baznivo!\nName: ${data.get('name')}\nPhone: ${data.get('phone')}\nEmail: ${data.get('email')}\n\n${data.get('message')}`;
     window.open(cartUrl(msg), '_blank');
-    toast('WhatsApp khul raha hai — bas send dabayein.');
+    toast('Opening WhatsApp — just tap send.');
   });
 }
 
@@ -930,7 +975,7 @@ function initWishlist() {
 }
 
 /* ==========================================================================
-   Orders (local record — WhatsApp par confirm hota hai)
+   Orders (saved in this browser — confirmed on WhatsApp)
    ========================================================================== */
 const Orders = {
   all() {
@@ -966,7 +1011,7 @@ function initCheckout() {
 
   const renderSummary = () => {
     const t = totalsFor(couponCode);
-    const items = Cart.items
+    const items = Cart.lines()
       .map((line) => {
         const p = bySlug(line.slug);
         if (!p) return '';
@@ -993,7 +1038,7 @@ function initCheckout() {
         ${t.discount ? `<div style="color:var(--green)"><span>Discount (${t.coupon.label})</span><strong>− ${money(t.discount)}</strong></div>` : ''}
         <div class="grand"><span>Total</span><span>${money(t.total)}</span></div>
       </div>
-      <p class="cart-note">Order confirm hone par hum WhatsApp par tracking bhejte hain.</p>`;
+      <p class="cart-note">We send tracking on WhatsApp as soon as your order is confirmed.</p>`;
 
     $('#apply-coupon')?.addEventListener('click', () => {
       couponCode = $('#coupon').value;
@@ -1003,7 +1048,7 @@ function initCheckout() {
       const msg = $('#coupon-msg');
       if (!c) msg.className = 'form-msg is-bad', (msg.textContent = 'That coupon code is not valid.');
       else if (Cart.subtotal() < c.min) msg.className = 'form-msg is-bad', (msg.textContent = `This coupon requires a minimum order of ${money(c.min)}.`);
-      else msg.className = 'form-msg is-ok', (msg.textContent = `Coupon lag gaya — ${c.label}`);
+      else msg.className = 'form-msg is-ok', (msg.textContent = `Coupon applied — ${c.label}`);
     });
     return t;
   };
@@ -1012,6 +1057,7 @@ function initCheckout() {
 
   $('#checkout-form')?.addEventListener('submit', (e) => {
     e.preventDefault();
+    Cart.prune();
     if (!Cart.items.length) {
       toast('Your cart is empty — add a product first.');
       return;
@@ -1021,10 +1067,12 @@ function initCheckout() {
     const order = {
       id: 'BZ-' + Date.now().toString(36).toUpperCase().slice(-6),
       date: new Date().toISOString(),
-      items: Cart.items.map((l) => {
-        const p = bySlug(l.slug);
-        return { slug: l.slug, name: p.name, price: p.price, qty: l.qty };
-      }),
+      items: Cart.items
+        .map((l) => {
+          const p = bySlug(l.slug);
+          return p ? { slug: l.slug, name: p.name, price: p.price, qty: l.qty } : null;
+        })
+        .filter(Boolean),
       totals: t,
       customer: {
         name: (fd.get('name') || '').toString().trim(),
