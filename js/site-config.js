@@ -77,6 +77,22 @@ const DEFAULT_SITE_CONFIG = {
     href: 'shop.html',
   },
   beautyOnly: true, // sirf makeup/beauty catalogue dikhao (baqi categories hide)
+
+  /* Orders: har order ka poora record is URL par POST hota hai (email / sheet / Zapier).
+     Default = FormSubmit (free). Pehla order aane par ek activation email aayega — ek click. */
+  ordersWebhook: 'https://formsubmit.co/ajax/mkhalid5838@gmail.com',
+
+  /* Publish: admin se "Publish live" GitHub par commit karta hai (token browser me rehta hai) */
+  publish: {
+    repo: 'muzamiliqbal0393-png/baznivo-storefront',
+    branch: 'main',
+    file: 'js/site-config.js',
+  },
+
+  /* Products: khali = API / bundled makeup catalogue. Admin → Products se bharne par
+     yahi catalogue live hota hai (publish ke baad). */
+  products: [],
+
   featured: [], // product slugs — khali chhorein to API ke featured products chalenge
   adminPasscode: 'baznivo',
 };

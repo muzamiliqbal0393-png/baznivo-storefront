@@ -989,6 +989,16 @@ const Orders = {
   find(id) {
     return this.all().find((o) => o.id === id);
   },
+  setStatus(id, status, message) {
+    const list = this.all();
+    const o = list.find((x) => x.id === id);
+    if (!o) return;
+    o.send = { status, message: message || '', at: new Date().toISOString() };
+    writeStore('baznivo-orders', list);
+  },
+  clear() {
+    writeStore('baznivo-orders', []);
+  },
 };
 
 const COUPONS = { CASTMATICS10: { off: 0.1, min: 1500, label: '10% off' } };
@@ -1000,6 +1010,58 @@ function totalsFor(couponCode) {
   const ok = c && sub >= c.min;
   const discount = ok ? Math.round(sub * c.off) : 0;
   return { sub, ship, discount, total: Math.max(0, sub + ship - discount), coupon: ok ? c : null };
+}
+
+/* order forwarding — set `ordersWebhook` in site-config.js / admin Store settings */
+function orderWebhookUrl() {
+  const u = window.BAZNIVO_CONFIG?.ordersWebhook;
+  return typeof u === 'string' && /^https:\/\//i.test(u.trim()) ? u.trim() : '';
+}
+
+function orderPayload(order) {
+  return {
+    _subject: `Baznivo order ${order.id}`,
+    _template: 'table',
+    _captcha: 'false',
+    Order: order.id,
+    Placed: new Date(order.date).toLocaleString('en-GB'),
+    Customer: order.customer.name,
+    Phone: order.customer.phone,
+    Email: order.customer.email || '-',
+    Address: `${order.customer.address}, ${order.customer.city}`,
+    Notes: order.customer.notes || '-',
+    Payment: order.payment,
+    Items: order.items.map((i) => `${i.qty} x ${i.name} @ ${money(i.price)}`).join(' | '),
+    Subtotal: money(order.totals.sub),
+    Delivery: order.totals.ship === 0 ? 'Free' : money(order.totals.ship),
+    Total: money(order.totals.total),
+    Store: location.origin,
+  };
+}
+
+/* returns 'sent' | 'failed' | 'off' — never throws, never blocks the order */
+async function sendOrderNotice(order) {
+  const url = orderWebhookUrl();
+  if (!url) return 'off';
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 6000);
+  try {
+    const r = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify(orderPayload(order)),
+      signal: ctrl.signal,
+    });
+    const d = await r.json().catch(() => ({}));
+    const ok = r.ok && String(d.success) !== 'false';
+    Orders.setStatus(order.id, ok ? 'sent' : 'failed', d.message || '');
+    return ok ? 'sent' : 'failed';
+  } catch (err) {
+    Orders.setStatus(order.id, 'failed', err.message || 'network');
+    return 'failed';
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 /* ==========================================================================
@@ -1055,7 +1117,7 @@ function initCheckout() {
 
   renderSummary();
 
-  $('#checkout-form')?.addEventListener('submit', (e) => {
+  $('#checkout-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     Cart.prune();
     if (!Cart.items.length) {
@@ -1087,7 +1149,14 @@ function initCheckout() {
     Orders.add(order);
     Cart.clear();
     sessionStorage.removeItem('baznivo-coupon');
-    location.href = 'order-success.html?order=' + encodeURIComponent(order.id);
+    const btn = e.target.querySelector('button[type="submit"]');
+    if (btn) {
+      btn.dataset.label = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = 'Placing your order…';
+    }
+    const status = await sendOrderNotice(order); // never throws
+    location.href = 'order-success.html?order=' + encodeURIComponent(order.id) + '&send=' + status;
   });
 }
 
@@ -1112,9 +1181,22 @@ function initOrderSuccess() {
   const waText =
     `Hello Baznivo! Please confirm my order:\nOrder #${order.id}\n\n` +
     order.items.map((i, n) => `${n + 1}. ${i.name} x${i.qty} — ${money(i.price * i.qty)}`).join('\n') +
-    `\n\nTotal: ${money(t.total)} (${payLabel})\nNaam: ${order.customer.name}\nPhone: ${order.customer.phone}\nAddress: ${order.customer.address}, ${order.customer.city}`;
+    `\n\nTotal: ${money(t.total)} (${payLabel})\nName: ${order.customer.name}\nPhone: ${order.customer.phone}\nAddress: ${order.customer.address}, ${order.customer.city}`;
 
   $('#order-ref').textContent = 'Order #' + order.id;
+
+  const sendState = new URLSearchParams(location.search).get('send') || order.send?.status || 'off';
+  const note =
+    sendState === 'sent'
+      ? 'Your order has been sent to our team. We confirm it on WhatsApp shortly.'
+      : sendState === 'failed'
+        ? 'Your order is saved on this device. Tap the WhatsApp button so we can confirm it straight away.'
+        : 'Your order is saved on this device. Tap the WhatsApp button to send it to our team.';
+  const noteEl = document.getElementById('order-send-note');
+  if (noteEl) {
+    noteEl.textContent = note;
+    noteEl.className = 'form-msg ' + (sendState === 'sent' ? 'is-ok' : 'is-bad');
+  }
   $('#order-details').innerHTML = `
     <h3>Order summary</h3>
     <div class="summary__items">
@@ -1147,6 +1229,6 @@ function initOrderSuccess() {
   $('#order-timeline').innerHTML = `
     <div class="tl is-done"><div class="tl__dot">${I.check}</div><div><strong>Order received</strong><span>Your order has been recorded.</span></div></div>
     <div class="tl"><div class="tl__dot">2</div><div><strong>WhatsApp confirmation</strong><span>We message you to confirm the details.</span></div></div>
-    <div class="tl"><div class="tl__dot">3</div><div><strong>Dispatch</strong><span>2–4 working days, tracking number ke saath.</span></div></div>
-    <div class="tl"><div class="tl__dot">4</div><div><strong>Delivered</strong><span>Cash on delivery par payment.</span></div></div>`;
+    <div class="tl"><div class="tl__dot">3</div><div><strong>Dispatch</strong><span>2–4 working days, with a tracking number.</span></div></div>
+    <div class="tl"><div class="tl__dot">4</div><div><strong>Delivered</strong><span>Pay cash when the parcel arrives.</span></div></div>`;
 }

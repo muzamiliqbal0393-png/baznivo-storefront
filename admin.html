@@ -44,6 +44,8 @@
         <button class="is-active" data-tab="hero">Hero slider</button>
         <button data-tab="content">Offers &amp; content</button>
         <button data-tab="featured">Featured products</button>
+        <button data-tab="products">Products</button>
+        <button data-tab="orders">Orders</button>
         <button data-tab="store">Store settings</button>
         <button data-tab="data">Backup &amp; publish</button>
       </nav>
@@ -107,6 +109,36 @@
           </div>
         </section>
 
+        <!-- ================= PRODUCTS ================= -->
+        <section class="panel" data-panel="products">
+          <div class="card">
+            <h2>Product catalogue</h2>
+            <p class="sub">Add or edit the makeup products the storefront shows. Leave the list empty to keep using the built-in catalogue.</p>
+            <div class="btn-row">
+              <button class="btn" id="prod-add" type="button">+ Add product</button>
+              <button class="btn btn--ghost" id="prod-seed" type="button">Load current catalogue</button>
+              <button class="btn btn--danger btn--sm" id="prod-clear" type="button">Clear list</button>
+              <span class="slide-card__meta" id="prod-count"></span>
+            </div>
+            <div id="prod-rows" style="margin-top:1rem"></div>
+          </div>
+        </section>
+
+        <!-- ================= ORDERS ================= -->
+        <section class="panel" data-panel="orders">
+          <div class="card">
+            <h2>Orders placed in this browser</h2>
+            <p class="sub">Every order is also sent to your order inbox and offered on WhatsApp (see Store settings → Order webhook). This table only shows orders placed on this device.</p>
+            <div class="btn-row">
+              <button class="btn btn--ghost btn--sm" id="ord-refresh" type="button">Refresh</button>
+              <button class="btn btn--ghost btn--sm" id="ord-csv" type="button">Download CSV</button>
+              <button class="btn btn--danger btn--sm" id="ord-clear" type="button">Clear</button>
+              <span class="slide-card__meta" id="ord-count"></span>
+            </div>
+            <div id="ord-list" style="margin-top:1rem"></div>
+          </div>
+        </section>
+
         <!-- ================= STORE ================= -->
         <section class="panel" data-panel="store">
           <div class="card">
@@ -124,6 +156,10 @@
               <div class="field"><label class="f" for="s-city">City</label><input id="s-city" type="text"></div>
               <div class="field"><label class="f" for="s-free">Free delivery above</label><input id="s-free" type="number" min="0" step="100"></div>
               <div class="field"><label class="f" for="s-currency">Currency</label><input id="s-currency" type="text"></div>
+            </div>
+            <div class="field"><label class="f" for="s-webhook">Order webhook (orders are POSTed here as JSON)</label>
+              <input id="s-webhook" type="url" placeholder="https://formsubmit.co/ajax/you@email.com">
+              <p class="sub" style="margin:.35rem 0 0">Leave the default to receive every order by email, or paste a Google Apps Script / Zapier URL. Empty = no forwarding.</p>
             </div>
           </div>
           <div class="card">
@@ -160,6 +196,24 @@
             </div>
           </div>
           <div class="card">
+            <h2>Publish live (one click)</h2>
+            <p class="sub">Saves everything in this panel straight to GitHub. Vercel redeploys automatically — the site is live in about a minute.</p>
+            <div class="field"><label class="f" for="pub-token">GitHub token (stored only in this browser)</label>
+              <input id="pub-token" type="password" autocomplete="off" placeholder="github_pat_…">
+              <p class="sub" style="margin:.35rem 0 0">Create a fine-grained token with <strong>Contents: Read and write</strong> on this one repository only. It is kept in this browser's localStorage and never sent anywhere except api.github.com.</p>
+            </div>
+            <div class="row2">
+              <div class="field"><label class="f" for="pub-repo">Repository</label><input id="pub-repo" type="text" placeholder="owner/repo"></div>
+              <div class="field"><label class="f" for="pub-branch">Branch</label><input id="pub-branch" type="text" placeholder="main"></div>
+            </div>
+            <div class="btn-row">
+              <button class="btn" id="pub-go" type="button">Publish live</button>
+              <button class="btn btn--ghost btn--sm" id="pub-forget" type="button">Forget token</button>
+            </div>
+            <div class="form-msg" id="pub-status"></div>
+          </div>
+
+          <div class="card">
             <h2>Where do products and orders live?</h2>
             <p class="sub">This panel controls the storefront's content — hero slides, banners, featured picks and store details. Products, prices, stock and orders are managed in your existing Baznivo dashboard.</p>
             <a class="btn btn--ghost" href="https://baznivo.vercel.app/admin" target="_blank" rel="noopener">Open products &amp; orders admin ↗</a>
@@ -179,6 +233,7 @@
 <div class="toast" id="toast"></div>
 
 <script src="js/site-config.js"></script>
+<script src="js/data.js"></script>
 <script>
 (function () {
   const KEY = 'baznivo-site-config';
@@ -398,6 +453,7 @@
     $('#s-city').value = s.city || '';
     $('#s-free').value = s.freeShipAt || 0;
     $('#s-currency').value = s.currency || 'Rs';
+    $('#s-webhook').value = draft.ordersWebhook || '';
     $('#s-beauty').checked = draft.beautyOnly !== false;
     $('#s-pass').value = draft.adminPasscode || '';
   }
@@ -406,6 +462,10 @@
       draft.store[key] = key === 'freeShipAt' ? Number(e.target.value) : e.target.value;
       markDirty();
     });
+  });
+  $('#s-webhook').addEventListener('input', (e) => {
+    draft.ordersWebhook = e.target.value.trim();
+    markDirty();
   });
   $('#s-beauty').addEventListener('change', (e) => {
     draft.beautyOnly = e.target.checked;
@@ -470,6 +530,251 @@
     draft.featured = [];
     renderPicks();
     markDirty();
+  });
+
+  /* ---------------- products ---------------- */
+  const prodRows = () => $('#prod-rows');
+  const blankProduct = () => ({
+    name: '',
+    category: 'lipsticks',
+    categoryName: 'Lipsticks',
+    price: 0,
+    oldPrice: 0,
+    stock: 20,
+    image: 'assets/img/p-lipstick.jpg',
+    blurb: '',
+  });
+
+  function renderProducts() {
+    const list = draft.products || [];
+    $('#prod-count').textContent = list.length ? list.length + ' products in this list' : 'Using built-in catalogue';
+    prodRows().innerHTML = list.length
+      ? list
+          .map(
+            (p, i) => `
+        <div class="card" style="padding: .85rem; margin-bottom: .7rem" data-pi="${i}">
+          <div class="row3">
+            <div class="field"><label class="f">Name</label><input type="text" data-pf="name" value="${escapeAttr(p.name)}"></div>
+            <div class="field"><label class="f">Category slug</label><input type="text" data-pf="category" value="${escapeAttr(p.category || '')}" placeholder="lipsticks"></div>
+            <div class="field"><label class="f">Category label</label><input type="text" data-pf="categoryName" value="${escapeAttr(p.categoryName || '')}" placeholder="Lipsticks"></div>
+          </div>
+          <div class="row3">
+            <div class="field"><label class="f">Price (Rs)</label><input type="number" min="0" data-pf="price" value="${Number(p.price) || 0}"></div>
+            <div class="field"><label class="f">Old price (optional)</label><input type="number" min="0" data-pf="oldPrice" value="${Number(p.oldPrice) || 0}"></div>
+            <div class="field"><label class="f">Stock</label><input type="number" min="0" data-pf="stock" value="${p.stock === '' ? 20 : Number(p.stock) || 0}"></div>
+          </div>
+          <div class="field"><label class="f">Image path or URL</label><input type="text" data-pf="image" value="${escapeAttr(p.image || '')}" placeholder="assets/img/p-lipstick.jpg"></div>
+          <div class="field"><label class="f">Short description</label><input type="text" data-pf="blurb" value="${escapeAttr(p.blurb || '')}"></div>
+          <button class="btn btn--danger btn--sm" type="button" data-prod-del="${i}">Remove</button>
+        </div>`
+          )
+          .join('')
+      : '<p class="sub">The built-in makeup catalogue is being used. Click <strong>Load current catalogue</strong> to copy it here and start editing.</p>';
+  }
+
+  prodRows().addEventListener('input', (e) => {
+    const card = e.target.closest('[data-pi]');
+    const field = e.target.dataset.pf;
+    if (!card || !field) return;
+    const i = Number(card.dataset.pi);
+    draft.products = draft.products || [];
+    const p = draft.products[i];
+    if (!p) return;
+    p[field] = ['price', 'oldPrice', 'stock'].includes(field) ? Number(e.target.value) : e.target.value;
+    if (field === 'name' && !draft.products[i].slug) draft.products[i].slug = '';
+    markDirty();
+  });
+
+  prodRows().addEventListener('click', (e) => {
+    const del = e.target.closest('[data-prod-del]');
+    if (!del) return;
+    draft.products.splice(Number(del.dataset.prodDel), 1);
+    renderProducts();
+    markDirty();
+  });
+
+  $('#prod-add').addEventListener('click', () => {
+    draft.products = draft.products || [];
+    draft.products.push(blankProduct());
+    renderProducts();
+    markDirty();
+  });
+
+  $('#prod-seed').addEventListener('click', () => {
+    if ((draft.products || []).length && !confirm('Replace your list with the current built-in catalogue?')) return;
+    const source = (typeof PRODUCTS !== 'undefined' ? PRODUCTS : []).map((p) => ({
+      name: p.name,
+      category: p.category,
+      categoryName: (typeof CATEGORIES !== 'undefined' && CATEGORIES.find((c) => c.slug === p.category)?.name) || p.category,
+      price: p.price,
+      oldPrice: p.oldPrice || 0,
+      stock: p.stock,
+      image: p.image,
+      blurb: p.blurb || '',
+    }));
+    draft.products = source;
+    renderProducts();
+    markDirty();
+    toast(source.length + ' products loaded');
+  });
+
+  $('#prod-clear').addEventListener('click', () => {
+    if (!confirm('Clear the product list and go back to the built-in catalogue?')) return;
+    draft.products = [];
+    renderProducts();
+    markDirty();
+  });
+
+  /* ---------------- orders (this device) ---------------- */
+  function readOrders() {
+    try {
+      return JSON.parse(localStorage.getItem('baznivo-orders') || '[]');
+    } catch {
+      return [];
+    }
+  }
+
+  function renderOrders() {
+    const list = readOrders();
+    $('#ord-count').textContent = list.length ? list.length + ' orders' : 'No orders in this browser';
+    $('#ord-list').innerHTML = list.length
+      ? `<div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:.85rem">
+          <thead><tr style="text-align:left;color:var(--muted)">
+            <th style="padding:.4rem">Order</th><th style="padding:.4rem">Date</th><th style="padding:.4rem">Customer</th>
+            <th style="padding:.4rem">Phone</th><th style="padding:.4rem">Items</th><th style="padding:.4rem">Total</th><th style="padding:.4rem">Sent</th>
+          </tr></thead><tbody>
+          ${list
+            .map(
+              (o) => `<tr style="border-top:1px solid var(--line)">
+              <td style="padding:.4rem"><strong>${escapeHtml(o.id)}</strong></td>
+              <td style="padding:.4rem">${new Date(o.date).toLocaleString('en-GB')}</td>
+              <td style="padding:.4rem">${escapeHtml(o.customer?.name || '')}</td>
+              <td style="padding:.4rem">${escapeHtml(o.customer?.phone || '')}</td>
+              <td style="padding:.4rem">${(o.items || []).map((i) => escapeHtml(i.name) + ' ×' + i.qty).join(', ')}</td>
+              <td style="padding:.4rem">Rs ${Number(o.totals?.total || 0).toLocaleString('en-US')}</td>
+              <td style="padding:.4rem">${o.send ? escapeHtml(o.send.status) : '—'}</td>
+            </tr>`
+            )
+            .join('')}
+          </tbody></table></div>`
+      : '<p class="sub">Place a test order on the storefront in this browser and it will appear here.</p>';
+  }
+
+  $('#ord-refresh').addEventListener('click', renderOrders);
+
+  $('#ord-csv').addEventListener('click', () => {
+    const list = readOrders();
+    if (!list.length) return toast('No orders to export');
+    const rows = [['Order', 'Date', 'Customer', 'Phone', 'Email', 'Address', 'City', 'Payment', 'Items', 'Total', 'Sent']];
+    list.forEach((o) => {
+      rows.push([
+        o.id,
+        o.date,
+        o.customer?.name || '',
+        o.customer?.phone || '',
+        o.customer?.email || '',
+        o.customer?.address || '',
+        o.customer?.city || '',
+        o.payment,
+        (o.items || []).map((i) => `${i.qty} x ${i.name}`).join(' | '),
+        o.totals?.total || 0,
+        o.send?.status || 'local',
+      ]);
+    });
+    const csv = rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+    a.download = 'baznivo-orders.csv';
+    a.click();
+    toast('CSV downloaded');
+  });
+
+  $('#ord-clear').addEventListener('click', () => {
+    if (!confirm('Remove the order log stored in this browser?')) return;
+    localStorage.setItem('baznivo-orders', '[]');
+    renderOrders();
+    toast('Order log cleared');
+  });
+
+  /* ---------------- publish live (GitHub) ---------------- */
+  const TOKEN_KEY = 'baznivo-gh-token';
+  const pubStatus = (msg, bad) => {
+    const el = $('#pub-status');
+    el.textContent = msg;
+    el.className = 'form-msg ' + (bad ? 'is-bad' : 'is-ok');
+  };
+
+  function fillPublish() {
+    $('#pub-token').value = localStorage.getItem(TOKEN_KEY) || '';
+    $('#pub-repo').value = draft.publish?.repo || 'muzamiliqbal0393-png/baznivo-storefront';
+    $('#pub-branch').value = draft.publish?.branch || 'main';
+  }
+
+  $('#pub-repo').addEventListener('input', (e) => {
+    draft.publish = draft.publish || {};
+    draft.publish.repo = e.target.value.trim();
+    markDirty();
+  });
+  $('#pub-branch').addEventListener('input', (e) => {
+    draft.publish = draft.publish || {};
+    draft.publish.branch = e.target.value.trim();
+    markDirty();
+  });
+  $('#pub-token').addEventListener('change', (e) => {
+    const v = e.target.value.trim();
+    if (v) localStorage.setItem(TOKEN_KEY, v);
+    else localStorage.removeItem(TOKEN_KEY);
+  });
+  $('#pub-forget').addEventListener('click', () => {
+    localStorage.removeItem(TOKEN_KEY);
+    $('#pub-token').value = '';
+    pubStatus('Token removed from this browser');
+  });
+
+  const b64 = (str) => btoa(unescape(encodeURIComponent(str)));
+
+  $('#pub-go').addEventListener('click', async () => {
+    const token = ($('#pub-token').value || '').trim();
+    const repo = ($('#pub-repo').value || '').trim();
+    const branch = ($('#pub-branch').value || 'main').trim();
+    const file = 'js/site-config.js';
+    if (!token) return pubStatus('Paste your GitHub token first (Backup & publish → GitHub token).', true);
+    if (!/^[\w.-]+\/[\w.-]+$/.test(repo)) return pubStatus('Repository must look like owner/name.', true);
+    localStorage.setItem(TOKEN_KEY, token);
+    const btn = $('#pub-go');
+    btn.disabled = true;
+    pubStatus('Saving to this browser…');
+    try {
+      save();
+      const headers = { Authorization: 'Bearer ' + token, Accept: 'application/vnd.github+json' };
+      const api = `https://api.github.com/repos/${repo}/contents/${file}?ref=${encodeURIComponent(branch)}`;
+      pubStatus('Reading current file from GitHub…');
+      const cur = await fetch(api, { headers }).then((r) => r.json());
+      if (!cur || !cur.sha) throw new Error(cur?.message || 'Could not read the config file');
+      const current = decodeURIComponent(escape(atob(cur.content.replace(/\n/g, ''))));
+      const json = JSON.stringify(draft, null, 2);
+      const next = current.replace(/const DEFAULT_SITE_CONFIG = \{[\s\S]*?\n\};/, 'const DEFAULT_SITE_CONFIG = ' + json + ';');
+      if (next === current) throw new Error('Config block not found in the file');
+      pubStatus('Committing…');
+      const put = await fetch(`https://api.github.com/repos/${repo}/contents/${file}`, {
+        method: 'PUT',
+        headers: { ...headers, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: 'Storefront: publish config from admin (' + new Date().toISOString().slice(0, 16).replace('T', ' ') + ')',
+          content: b64(next),
+          branch,
+          sha: cur.sha,
+        }),
+      });
+      const res = await put.json();
+      if (!put.ok) throw new Error(res?.message || 'GitHub rejected the commit');
+      pubStatus('Published ✓ commit ' + res.commit.sha.slice(0, 7) + ' — Vercel is redeploying (about a minute).');
+      toast('Published to GitHub');
+    } catch (err) {
+      pubStatus('Publish failed: ' + err.message, true);
+    } finally {
+      btn.disabled = false;
+    }
   });
 
   /* ---------------- save / export ---------------- */
@@ -540,6 +845,9 @@
     fillPromo();
     fillStore();
     renderPicks();
+    renderProducts();
+    renderOrders();
+    fillPublish();
   }
 
   $('#hero-interval').addEventListener('input', (e) => {

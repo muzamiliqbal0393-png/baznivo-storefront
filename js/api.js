@@ -273,6 +273,61 @@ window.BAZNIVO_API_READY = (async () => {
   }
 })();
 
+/* ==========================================================================
+   Admin-managed catalogue
+   site-config.js ke `products` array me products hon to wohi catalogue chalta hai
+   (admin.html → Products tab → Publish). Khali ho to API / bundled catalogue.
+   ========================================================================== */
+function applyAdminCatalogue() {
+  const cfg = window.BAZNIVO_CONFIG || {};
+  const list = (cfg.products || []).filter((p) => p && p.name && Number(p.price) > 0);
+  if (!list.length) return;
+
+  const slugify = (v) =>
+    String(v || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60);
+
+  const cats = new Map();
+  const prods = list.map((p, i) => {
+    const catSlug = slugify(p.category) || 'makeup';
+    const catName = p.categoryName || (p.category ? String(p.category) : 'Makeup');
+    if (!cats.has(catSlug)) cats.set(catSlug, { slug: catSlug, name: catName, image: '', count: 0 });
+    const c = cats.get(catSlug);
+    c.count += 1;
+    const img = p.image || 'assets/img/p-lipstick.jpg';
+    if (!c.image) c.image = img;
+    return {
+      id: i + 1,
+      slug: slugify(p.slug || p.name),
+      name: p.name,
+      brand: p.brand || 'Baznivo Studio',
+      category: catSlug,
+      price: Math.round(Number(p.price)),
+      oldPrice: p.oldPrice ? Math.round(Number(p.oldPrice)) : 0,
+      image: img,
+      gallery: [img].concat(p.image2 ? [p.image2] : []),
+      badge: p.badge || '',
+      rating: Number(p.rating) || 4.7,
+      reviews: Number(p.reviews) || 0,
+      stock: p.stock === '' || p.stock === undefined || p.stock === null ? 20 : Number(p.stock),
+      shades: Array.isArray(p.shades) ? p.shades : [],
+      blurb: p.blurb || '',
+      desc: p.desc || p.blurb || '',
+      specs: p.specs || {},
+      howTo: p.howTo || [],
+    };
+  });
+
+  PRODUCTS = prods;
+  CATEGORIES = [...cats.values()].sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
+  window.BAZNIVO_FEATURED = PRODUCTS.filter((p) => p.stock > 0).slice(0, 8);
+  window.BAZNIVO_NEW = PRODUCTS.slice(-4).reverse();
+  window.BAZNIVO_SOURCE = 'admin';
+}
+window.BAZNIVO_applyAdminCatalogue = applyAdminCatalogue;
+
+/* apply admin catalogue once the API attempt finishes (success or fail) */
+window.BAZNIVO_API_READY.then(applyAdminCatalogue, applyAdminCatalogue);
+
 /* single blog post (article view ke liye) */
 window.BAZNIVO_getPost = async function (slug) {
   try {
