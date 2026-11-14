@@ -403,6 +403,12 @@ function closeCart() {
 
 
 /* ----------------------------- hero slider ----------------------------- */
+/* phones ko chhota (720p) file do, desktop ko full 1080p — same footage */
+function heroVideoSrc(src) {
+  if (!src || !/^assets\/video\//i.test(src)) return src;
+  const small = window.matchMedia('(max-width: 800px)').matches;
+  return small ? src.replace(/\.mp4$/i, '-720.mp4') : src;
+}
 function initHero() {
   const mount = $('#hero-slides');
   if (!mount) return;
@@ -418,7 +424,7 @@ function initHero() {
         ${
           sl.video
             ? `<video class="hero__video" muted loop playsinline preload="${i === 0 ? 'auto' : 'none'}" poster="${sl.poster || ''}" aria-hidden="true">
-                 <source src="${sl.video}" type="video/mp4">
+                 <source src="${heroVideoSrc(sl.video)}" type="video/mp4">
                </video>`
             : `<img src="${sl.image}" alt="${(sl.title || 'Baznivo').replace(/"/g, '')}"${i ? ' loading="lazy"' : ''} style="object-position:${sl.focus || 'center'}">`
         }

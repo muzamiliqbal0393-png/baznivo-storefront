@@ -645,13 +645,12 @@ p:last-child { margin-bottom: 0; }
 
 .hero__media { position: absolute; inset: 0; z-index: 0; overflow: hidden; background: #2b0546; }
 .hero__media img, .hero__video { width: 100%; height: 100%; object-fit: cover; display: block; }
-.hero__video { filter: saturate(1.08) brightness(1.06) contrast(1.03); }
+.hero__video { filter: saturate(1.06) brightness(1.02) contrast(1.06); }
+/* footage carries the design — gradient only anchors the top bar and the copy */
 .hero__media::after {
   content: ""; position: absolute; inset: 0;
   background:
-    radial-gradient(120% 85% at 50% -10%, rgba(51, 6, 92, .10), rgba(18, 2, 36, .46) 80%),
-    linear-gradient(200deg, rgba(51, 6, 92, .22), rgba(192, 38, 211, .10)),
-    linear-gradient(180deg, rgba(18, 2, 36, .34) 0%, rgba(18, 2, 36, .10) 42%, rgba(18, 2, 36, .50) 100%);
+    linear-gradient(180deg, rgba(18, 2, 36, .30) 0%, rgba(18, 2, 36, .06) 22%, rgba(18, 2, 36, .06) 62%, rgba(18, 2, 36, .45) 100%);
 }
 .hero__in { position: relative; z-index: 1; }
 .hero__content {
@@ -661,7 +660,7 @@ p:last-child { margin-bottom: 0; }
 /* soft scrim behind the copy only — keeps video footage visible at the edges */
 .hero__content::before {
   content: ""; position: absolute; inset: -8% -14%; z-index: -1; pointer-events: none;
-  background: radial-gradient(58% 62% at 50% 46%, rgba(18, 2, 36, .62) 0%, rgba(18, 2, 36, .30) 55%, rgba(18, 2, 36, 0) 78%);
+  background: radial-gradient(52% 58% at 50% 46%, rgba(18, 2, 36, .60) 0%, rgba(18, 2, 36, .28) 56%, rgba(18, 2, 36, 0) 78%);
 }
 .hero__mark { height: clamp(52px, 6.5vw, 78px); margin: 0 auto 1rem; filter: drop-shadow(0 8px 22px rgba(0, 0, 0, .45)); }
 .hero__tagline {
@@ -691,6 +690,19 @@ p:last-child { margin-bottom: 0; }
 .hero__dots {
   position: absolute; left: 50%; bottom: 34px; transform: translateX(-50%); z-index: 3;
   display: flex; gap: .4rem;
+}
+
+/* short laptop screens (≤ 940px tall): keep the whole hero — copy, buttons and dots —
+   above the trust bar so nothing overlaps */
+@media (min-width: 701px) and (max-height: 940px) {
+  .hero__viewport { min-height: 470px; }
+  .hero__content { padding-block: 1.5rem 2.8rem; }
+  .hero__mark { height: 48px; margin-bottom: .55rem; }
+  .hero__tagline { font-size: .7rem; margin-bottom: .5rem; letter-spacing: .18em; }
+  .hero__title { font-size: clamp(1.7rem, 3.5vw, 2.55rem); margin-bottom: .55rem; }
+  .hero__sub { font-size: .92rem; line-height: 1.5; margin-bottom: 1.05rem; }
+  .hero__actions .btn { padding: .72rem 1.25rem; font-size: .9rem; }
+  .hero__dots { bottom: 34px; }
 }
 .hero__dot {
   width: 9px; height: 9px; border-radius: 999px; border: 0; cursor: pointer;
@@ -830,7 +842,7 @@ h1, h2, h3 { letter-spacing: -.015em; }
   .feature-grid, .review-grid { grid-template-columns: 1fr; }
   .footer__top { grid-template-columns: 1fr; gap: 1.6rem; }
   .hero__slide { min-height: 480px; }
-  .hero__media::after { background: linear-gradient(180deg, rgba(28, 3, 48, .35), rgba(28, 3, 48, .82)); }
+  .hero__media::after { background: linear-gradient(180deg, rgba(28, 3, 48, .22), rgba(28, 3, 48, .60)); }
   .hero--alt .hero__media img { display: none; }
   .p-card__quick { opacity: 1; transform: none; }
   .p-card__wish { opacity: 1; transform: none; }
@@ -961,8 +973,7 @@ h1, h2, h3 { letter-spacing: -.015em; }
   .hero__actions .btn { flex: 1 1 auto; justify-content: center; padding: .78rem 1rem; font-size: .88rem; }
   .hero__media::after {
     background:
-      radial-gradient(120% 80% at 50% 0%, rgba(30, 4, 54, .55), rgba(16, 2, 32, .8) 70%),
-      linear-gradient(180deg, rgba(16, 2, 32, .7) 0%, rgba(16, 2, 32, .5) 45%, rgba(16, 2, 32, .85) 100%);
+      linear-gradient(180deg, rgba(16, 2, 32, .30) 0%, rgba(16, 2, 32, .12) 40%, rgba(16, 2, 32, .62) 100%);
   }
   .hero__in { padding-block: 2.6rem 3rem; }
   .hero__mark { height: 52px; margin-bottom: .7rem; }
@@ -972,7 +983,7 @@ h1, h2, h3 { letter-spacing: -.015em; }
   .hero__actions { gap: .6rem; }
   .hero__actions .btn { flex: 1 1 auto; justify-content: center; padding: .8rem 1rem; font-size: .9rem; }
   .hero__media::after {
-    background: linear-gradient(180deg, rgba(28, 3, 48, .55) 0%, rgba(28, 3, 48, .5) 45%, rgba(28, 3, 48, .8) 100%);
+    background: linear-gradient(180deg, rgba(28, 3, 48, .34) 0%, rgba(28, 3, 48, .16) 42%, rgba(28, 3, 48, .62) 100%);
   }
 
   /* trust strip: 2 x 2, orphan item hataya */
