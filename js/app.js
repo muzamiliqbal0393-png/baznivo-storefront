@@ -423,7 +423,7 @@ function initHero() {
       <div class="hero__media">
         ${
           sl.video
-            ? `<video class="hero__video" muted loop playsinline preload="${i === 0 ? 'auto' : 'none'}" poster="${sl.poster || ''}" aria-hidden="true">
+            ? `<video class="hero__video" muted loop playsinline preload="${i === 0 ? 'auto' : 'none'}" poster="${sl.poster || ''}" style="object-position:${sl.focus || 'center'}" aria-hidden="true">
                  <source src="${heroVideoSrc(sl.video)}" type="video/mp4">
                </video>`
             : `<img src="${sl.image}" alt="${(sl.title || 'Baznivo').replace(/"/g, '')}"${i ? ' loading="lazy"' : ''} style="object-position:${sl.focus || 'center'}">`

@@ -27,6 +27,7 @@ const DEFAULT_SITE_CONFIG = {
       {
         video: 'assets/video/hero-1.mp4',
         poster: 'assets/img/hero-poster/hero-1.jpg',
+        focus: 'center 40%',
         layout: 'full',
         kicker: 'Baznivo — Your Beauty, Your Style',
         title: 'Beauty that fits your everyday',
@@ -39,6 +40,7 @@ const DEFAULT_SITE_CONFIG = {
       {
         video: 'assets/video/hero-2.mp4',
         poster: 'assets/img/hero-poster/hero-2.jpg',
+        focus: 'center 46%',
         layout: 'full',
         kicker: 'Big lashes, zero clumps',
         title: 'Mascara that lifts and holds',
@@ -49,6 +51,7 @@ const DEFAULT_SITE_CONFIG = {
       {
         video: 'assets/video/hero-3.mp4',
         poster: 'assets/img/hero-poster/hero-3.jpg',
+        focus: 'center 44%',
         layout: 'full',
         kicker: 'Blended in seconds',
         title: 'Shadow that flatters every skin tone',
@@ -59,6 +62,7 @@ const DEFAULT_SITE_CONFIG = {
       {
         video: 'assets/video/hero-4.mp4',
         poster: 'assets/img/hero-poster/hero-4.jpg',
+        focus: 'center 50%',
         layout: 'full',
         kicker: 'Pro tools',
         title: 'Brushes that do the work',

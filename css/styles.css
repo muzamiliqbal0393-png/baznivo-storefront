@@ -614,14 +614,20 @@ p:last-child { margin-bottom: 0; }
 
 /* ---------- WhatsApp float ---------- */
 .wa-float {
-  position: fixed; right: 18px; bottom: 20px; z-index: 80;
-  display: inline-flex; align-items: center; gap: .6rem;
-  background: #25d366; color: #fff; font-weight: 700; font-size: .88rem;
-  padding: .8rem 1.1rem; border-radius: 999px; box-shadow: 0 14px 30px rgba(37, 211, 102, .4);
-  transition: transform .18s ease;
+  position: fixed; right: clamp(14px, 1.6vw, 24px); bottom: clamp(14px, 2.2vh, 26px); z-index: 95;
+  display: grid; place-items: center; width: 54px; height: 54px; border-radius: 50%;
+  background: #25d366; color: #fff; box-shadow: 0 12px 26px rgba(37, 211, 102, .38);
+  transition: transform .18s ease, box-shadow .18s ease;
 }
-.wa-float:hover { transform: translateY(-3px); }
-.wa-float svg { flex: none; }
+.wa-float:hover { transform: translateY(-3px); box-shadow: 0 16px 32px rgba(37, 211, 102, .5); }
+.wa-float svg { flex: none; width: 26px; height: 26px; }
+/* label only on hover — the button itself is never clipped by the viewport */
+.wa-float span {
+  position: absolute; right: calc(100% + 10px); top: 50%; transform: translateY(-50%);
+  white-space: nowrap; background: #16032a; color: #fff; font-weight: 700; font-size: .78rem;
+  padding: .42rem .6rem; border-radius: 8px; opacity: 0; pointer-events: none; transition: opacity .16s ease;
+}
+.wa-float:hover span, .wa-float:focus-visible span { opacity: 1; }
 
 /* ---------- Misc ---------- */
 .reveal { opacity: 0; transform: translateY(18px); transition: opacity .6s ease, transform .6s ease; }
@@ -681,8 +687,8 @@ p:last-child { margin-bottom: 0; }
 .hero__nav {
   position: absolute; top: 50%; transform: translateY(-50%); z-index: 3;
   width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center;
-  background: rgba(255, 255, 255, .16); border: 1px solid rgba(255, 255, 255, .4);
-  color: #fff; backdrop-filter: blur(6px); cursor: pointer; transition: .2s ease;
+  background: rgba(14, 2, 28, .42); border: 1px solid rgba(255, 255, 255, .55);
+  color: #fff; backdrop-filter: blur(6px) saturate(1.1); cursor: pointer; transition: .2s ease;
 }
 .hero__nav:hover { background: #fff; color: var(--purple-deep); border-color: #fff; }
 .hero__nav--prev { left: 18px; }
@@ -690,6 +696,26 @@ p:last-child { margin-bottom: 0; }
 .hero__dots {
   position: absolute; left: 50%; bottom: 34px; transform: translateX(-50%); z-index: 3;
   display: flex; gap: .4rem;
+}
+
+/* desktop: copy sits on the left, the footage stays clean on the right */
+@media (min-width: 901px) {
+  .hero__content {
+    max-width: 620px; margin-inline: 0; text-align: left;
+    padding-block: clamp(1.8rem, 3.4vw, 3rem) clamp(3.4rem, 4.6vw, 4.4rem);
+  }
+  .hero__mark { margin-left: 0; margin-right: auto; }
+  .hero__sub { margin-inline: 0; max-width: 46ch; }
+  .hero__actions { justify-content: flex-start; }
+  .hero__content::before { display: none; }
+  .hero__media::after {
+    background:
+      linear-gradient(90deg, rgba(14, 2, 28, .90) 0%, rgba(14, 2, 28, .74) 24%, rgba(14, 2, 28, .38) 44%, rgba(14, 2, 28, .10) 62%, rgba(14, 2, 28, 0) 78%),
+      linear-gradient(180deg, rgba(14, 2, 28, .38) 0%, rgba(14, 2, 28, 0) 22%, rgba(14, 2, 28, 0) 80%, rgba(14, 2, 28, .30) 100%);
+  }
+  /* arrows move to the right edge so they never sit on the copy */
+  .hero__nav--prev { left: auto; right: 86px; }
+  .hero__nav--next { right: 26px; }
 }
 
 /* short laptop screens (≤ 940px tall): keep the whole hero — copy, buttons and dots —
@@ -848,8 +874,8 @@ h1, h2, h3 { letter-spacing: -.015em; }
   .p-card__wish { opacity: 1; transform: none; }
   .newsletter form { flex-direction: column; }
   .newsletter .btn { width: 100%; }
+  .wa-float { width: 52px; height: 52px; }
   .wa-float span { display: none; }
-  .wa-float { padding: .9rem; }
   .shop__bar { justify-content: flex-start; }
 }
 
@@ -1062,4 +1088,23 @@ h1, h2, h3 { letter-spacing: -.015em; }
   .pd__buy .btn--ghost { flex: 1 1 100%; }
   .pd__price { flex-wrap: wrap; row-gap: .3rem; }
   .pd h1 { font-size: 1.5rem; line-height: 1.2; }
+}
+
+/* ==========================================================================
+   Desktop hero: copy on the left, footage clear on the right (final overrides)
+   ========================================================================== */
+@media (min-width: 901px) {
+  .hero__sub { margin-left: 0; margin-right: auto; max-width: 46ch; }
+  .hero__mark { margin-left: 0; margin-right: auto; }
+  .hero__dots { filter: drop-shadow(0 2px 8px rgba(0, 0, 0, .5)); }
+}
+
+/* phones: copy stays left-aligned too (never centred), video visible above it */
+@media (max-width: 700px) {
+  .hero__content { text-align: left; }
+  .hero__mark { margin-left: 0; margin-right: auto; }
+  .hero__sub { margin-left: 0; margin-right: 0; max-width: none; }
+  .hero__actions { justify-content: flex-start; }
+  .hero__actions .btn { flex: 0 1 auto; }
+  .hero__content::before { display: none; }
 }
